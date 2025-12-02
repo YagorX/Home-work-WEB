@@ -5,11 +5,301 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог Renault</title>
     <link rel="stylesheet" href="styles/style2.css">
+    <style>
+        /* Стили для поиска */
+        .search-container {
+            max-width: 1200px;
+            margin: 20px auto 30px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            font-size: 14px;
+            width: 100%;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0078D7;
+            box-shadow: 0 0 0 2px rgba(0, 120, 215, 0.2);
+        }
+
+        .search-output {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .search-output:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+        }
+
+        /* Стили для фильтра категорий */
+        .category-filter {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .category-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-1px);
+        }
+
+        .category-btn.active {
+            background: #0078D7;
+            color: white;
+            border-color: #0078D7;
+        }
+
+        /* Стили для информации о поиске */
+        .search-info {
+            text-align: center;
+            margin: 15px auto;
+            color: #666;
+            font-size: 14px;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .search-stats {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .clear-search {
+            margin-left: 10px;
+            padding: 5px 12px;
+            background: #f8f9fa;
+            border: 1px solid #dc3545;
+            border-radius: 20px;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-search:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .clear-search.hidden {
+            display: none;
+        }
+
+        /* Стили для подсветки результатов */
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* Стили для пустых результатов */
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+            display: none;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .no-results.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .no-results h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .no-results p {
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        .try-again-btn {
+            padding: 8px 20px;
+            background: #0078D7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .try-again-btn:hover {
+            background: #0056A6;
+        }
+
+        /* Стили для скрытия/показа */
+        .section.hidden {
+            display: none;
+        }
+
+        .card.hidden {
+            display: none;
+        }
+
+        /* Анимация для результатов поиска */
+        .card:not(.hidden) {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .search-container {
+                padding: 0 15px;
+            }
+            
+            .input-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-input, .search-output {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .category-filter {
+                gap: 8px;
+            }
+            
+            .category-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            
+            .search-info {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-container {
+                margin: 15px auto;
+            }
+            
+            .category-filter {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .category-btn {
+                flex-shrink: 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Контейнер с размытым фоном и кнопкой -->
     <div class="home-button-container">
         <a href="index.html" class="home-button">На главную</a>
+
+        <div class="search-container">
+        <div class="input-container">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="Поиск по каталогу: модель, описание, характеристики..."
+                autocomplete="off"
+            >
+            <input 
+                type="button" 
+                class="search-output" 
+                id="searchButton" 
+                value="Искать"
+            >
+        </div>
+    </div>
+    </div>
+
+    <!-- Поисковая строка -->
+    
+    
+    <!-- Информация о поиске -->
+    <div class="search-info">
+        <div class="search-stats">
+            Всего: <span id="totalCount">0</span> | Найдено: <span id="foundCount">0</span>
+            <button class="clear-search hidden" id="clearSearch">Очистить</button>
+        </div>
+    </div>
+
+    <!-- Фильтр по категориям -->
+    <div class="category-filter" id="categoryFilter">
+        <button class="category-btn active" data-category="all">Все автомобили</button>
+        <button class="category-btn" data-category="light-cars">Легковые</button>
+        <button class="category-btn" data-category="crossovers">Кроссоверы</button>
+        <button class="category-btn" data-category="commercial">Коммерческие</button>
+        <button class="category-btn" data-category="electro">Электро/гибриды</button>
+    </div>
+
+    <!-- Сообщение об отсутствии результатов -->
+    <div class="no-results" id="noResults">
+        <h3>🚗 Ничего не найдено</h3>
+        <p>Попробуйте изменить поисковый запрос или выберите другую категорию</p>
+        <button class="try-again-btn" id="tryAgainBtn">Сбросить фильтры</button>
     </div>
 
     <!-- Модальное окно для деталей -->
@@ -66,7 +356,13 @@
             <h2 class="section-title">Легковые автомобили</h2>
             <div class="cards-grid">
                 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Logan",
+                    "description": "Надежный седан для города и трассы. Идеальное сочетание цены и качества.",
+                    "features": ["Расход: 6.1 л/100км", "Мощность: 82 л.с.", "Объем багажника: 510 л"],
+                    "price": "от 950 000 ₽",
+                    "category": "Легковые"
+                }'>
                     <img class="card-image" src="images/renault_logan.jpeg" alt="Renault Logan">
                     <div class="card-content">
                         <h3 class="card-title">Renault Logan</h3>
@@ -81,7 +377,13 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Sandero",
+                    "description": "Компактный хэтчбек с просторным салоном и экономичным двигателем.",
+                    "features": ["Расход: 5.8 л/100км", "Мощность: 75 л.с.", "5-ступенчатая МКПП"],
+                    "price": "от 890 000 ₽",
+                    "category": "Легковые"
+                }'>
                     <img class="card-image" src="images/renault_sander.jpg" alt="Renault Sandero">
                     <div class="card-content">
                         <h3 class="card-title">Renault Sandero</h3>
@@ -96,7 +398,13 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Sandero Stepway",
+                    "description": "Хэтчбек в кросс-кузове с увеличенным клиренсом и стильным дизайном.",
+                    "features": ["Клиренс: 195 мм", "Мощность: 90 л.с.", "Защита бампера"],
+                    "price": "от 1 100 000 ₽",
+                    "category": "Легковые"
+                }'>
                     <img class="card-image" src="images/renault_sander_stepway.jpeg" alt="Renault Sandero Stepway">
                     <div class="card-content">
                         <h3 class="card-title">Renault Sandero Stepway</h3>
@@ -119,7 +427,13 @@
             <h2 class="section-title">Кроссоверы</h2>
             <div class="cards-grid">
                 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Duster",
+                    "description": "Легендарный внедорожник с полным приводом. Покоритель любых дорог.",
+                    "features": ["Полный привод 4x4", "Мощность: 114 л.с.", "Клиренс: 210 мм"],
+                    "price": "от 1 450 000 ₽",
+                    "category": "Кроссоверы"
+                }'>
                     <img class="card-image" src="images/duster.jpeg" alt="Renault Duster">
                     <div class="card-content">
                         <h3 class="card-title">Renault Duster</h3>
@@ -134,7 +448,13 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Kaptur",
+                    "description": "Стильный компактный кроссовер с передовыми технологиями безопасности.",
+                    "features": ["Система ESP", "Мощность: 113 л.с.", "Мультимедиа R-Link"],
+                    "price": "от 1 350 000 ₽",
+                    "category": "Кроссоверы"
+                }'>
                     <img class="card-image" src="images/kapture.jpeg" alt="Renault Kaptur">
                     <div class="card-content">
                         <h3 class="card-title">Renault Kaptur</h3>
@@ -149,7 +469,13 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Arkana",
+                    "description": "Элегантное кросс-купе с динамичным характером и просторным салоном.",
+                    "features": ["Купе-форма", "Мощность: 150 л.с.", "Вариатор X-Tronic"],
+                    "price": "от 1 650 000 ₽",
+                    "category": "Кроссоверы"
+                }'>
                     <img class="card-image" src="images/arkana.jpeg" alt="Renault Arkana">
                     <div class="card-content">
                         <h3 class="card-title">Renault Arkana</h3>
@@ -172,7 +498,13 @@
             <h2 class="section-title">Коммерческие автомобили</h2>
             <div class="cards-grid">
                 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Logan Van",
+                    "description": "Коммерческая версия Logan с увеличенным багажным отделением.",
+                    "features": ["Объем багажника: 800 л", "Грузоподъемность: 500 кг", "Низкий расход топлива"],
+                    "price": "от 1 000 000 ₽",
+                    "category": "Коммерческие"
+                }'>
                     <img class="card-image" src="images/van.jpeg" alt="Renault Logan Van">
                     <div class="card-content">
                         <h3 class="card-title">Renault Logan Van</h3>
@@ -187,7 +519,13 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Kangoo",
+                    "description": "Компактный коммерческий автомобиль с отличной маневренностью.",
+                    "features": ["Объем: 3-4.6 м³", "Грузоподъемность: 650 кг", "Сдвижные двери"],
+                    "price": "от 1 300 000 ₽",
+                    "category": "Коммерческие"
+                }'>
                     <img class="card-image" src="images/kangoo.jpeg" alt="Renault Kangoo">
                     <div class="card-content">
                         <h3 class="card-title">Renault Kangoo</h3>
@@ -202,7 +540,13 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" data-search-index='{
+                    "title": "Renault Trafic",
+                    "description": "Универсальный коммерческий автомобиль для перевозки грузов.",
+                    "features": ["Объем: 5.2-8.6 м³", "Грузоподъемность: 1-1.5 т", "Дизельный двигатель"],
+                    "price": "от 1 800 000 ₽",
+                    "category": "Коммерческие"
+                }'>
                     <img class="card-image" src="images/trafic.jpg" alt="Renault Trafic">
                     <div class="card-content">
                         <h3 class="card-title">Renault Trafic</h3>
@@ -225,7 +569,13 @@
             <h2 class="section-title">Электромобили и гибриды</h2>
             <div class="cards-grid">
                 
-                <div class="card ev-card">
+                <div class="card ev-card" data-search-index='{
+                    "title": "Renault ZOE",
+                    "description": "Компактный электромобиль для города с впечатляющим запасом хода.",
+                    "features": ["Запас хода: 395 км", "Мощность: 135 л.с.", "Быстрая зарядка за 30 мин"],
+                    "price": "от 2 200 000 ₽",
+                    "category": "Электромобили"
+                }'>
                     <img class="card-image" src="images/zoe.jpeg" alt="Renault ZOE">
                     <div class="card-content">
                         <h3 class="card-title">Renault ZOE</h3>
@@ -240,7 +590,13 @@
                     </div>
                 </div>
 
-                <div class="card ev-card">
+                <div class="card ev-card" data-search-index='{
+                    "title": "Renault Megane E-Tech",
+                    "description": "Современный электрокроссовер с технологиями нового поколения.",
+                    "features": ["Запас хода: 470 км", "Мощность: 220 л.с.", "Цифровая панель 12,3"],
+                    "price": "от 3 500 000 ₽",
+                    "category": "Электромобили"
+                }'>
                     <img class="card-image" src="images/megane e.jpg" alt="Renault Megane E-Tech">
                     <div class="card-content">
                         <h3 class="card-title">Renault Megane E-Tech</h3>
@@ -255,7 +611,13 @@
                     </div>
                 </div>
 
-                <div class="card ev-card">
+                <div class="card ev-card" data-search-index='{
+                    "title": "Renault Captur E-Tech",
+                    "description": "Гибридный кроссовер с экономичным расходом и отличной динамикой.",
+                    "features": ["Гибридная система", "Расход: 4.5 л/100км", "Электро-привод на малых скоростях"],
+                    "price": "от 1 900 000 ₽",
+                    "category": "Гибриды"
+                }'>
                     <img class="card-image" src="images/captur e.jpg" alt="Renault Captur E-Tech">
                     <div class="card-content">
                         <h3 class="card-title">Renault Captur E-Tech</h3>
@@ -274,121 +636,356 @@
         </div>
 
     </div>
+
 <script>
+    // Поисковая система
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const clearSearch = document.getElementById('clearSearch');
+    const tryAgainBtn = document.getElementById('tryAgainBtn');
+    const noResults = document.getElementById('noResults');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    const totalCountEl = document.getElementById('totalCount');
+    const foundCountEl = document.getElementById('foundCount');
+    const cards = document.querySelectorAll('.card');
+    const sections = document.querySelectorAll('.section');
+    
+    let activeCategory = 'all';
+    let lastSearchTerm = '';
+    
+    // Инициализация
+    function initSearch() {
+        totalCountEl.textContent = cards.length;
+        updateSearchStats();
+        
+        // Обработчик кнопки поиска
+        searchButton.addEventListener('click', performSearch);
+        
+        // Поиск по Enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // Обработчик очистки поиска
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            lastSearchTerm = '';
+            setActiveCategory('all');
+            performSearch();
+            this.classList.add('hidden');
+        });
+        
+        // Обработчик кнопки "Сбросить фильтры"
+        tryAgainBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            lastSearchTerm = '';
+            setActiveCategory('all');
+            performSearch();
+            searchInput.focus();
+        });
+        
+        // Обработчики фильтра категорий
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.dataset.category;
+                setActiveCategory(category);
+                performSearch();
+            });
+        });
+        
+        // Автопоиск при изменении текста (с задержкой)
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.trim() !== lastSearchTerm) {
+                    performSearch();
+                }
+            }, 300);
+        });
+    }
+    
+    // Установка активной категории
+    function setActiveCategory(category) {
+        activeCategory = category;
+        categoryBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.category === category) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    // Выполнение поиска
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        lastSearchTerm = searchTerm;
+        let foundCount = 0;
+        let visibleSections = 0;
+        
+        // Скрыть сообщение об отсутствии результатов
+        noResults.classList.remove('show');
+        
+        // Показать/скрыть кнопку очистки
+        if (searchTerm || activeCategory !== 'all') {
+            clearSearch.classList.remove('hidden');
+        } else {
+            clearSearch.classList.add('hidden');
+        }
+        
+        // Сначала показываем все карточки и секции
+        cards.forEach(card => {
+            card.classList.remove('hidden');
+            // Удаляем предыдущую подсветку
+            const title = card.querySelector('.card-title');
+            const description = card.querySelector('.card-description');
+            if (title) title.innerHTML = title.textContent;
+            if (description) description.innerHTML = description.textContent;
+        });
+        sections.forEach(section => section.classList.remove('hidden'));
+        
+        // Если есть поисковый запрос или активная категория не "все"
+        if (searchTerm || activeCategory !== 'all') {
+            cards.forEach(card => {
+                const cardData = JSON.parse(card.dataset.searchIndex || '{}');
+                const shouldShow = isCardMatch(cardData, searchTerm, activeCategory);
+                
+                if (shouldShow) {
+                    card.classList.remove('hidden');
+                    foundCount++;
+                    
+                    // Подсветка найденных слов
+                    if (searchTerm) {
+                        highlightMatches(card, cardData, searchTerm);
+                    }
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            // Управление видимостью секций
+            sections.forEach(section => {
+                const sectionCards = section.querySelectorAll('.card:not(.hidden)');
+                if (sectionCards.length === 0) {
+                    section.classList.add('hidden');
+                } else {
+                    section.classList.remove('hidden');
+                    visibleSections++;
+                }
+            });
+            
+            // Показать сообщение, если ничего не найдено
+            if (foundCount === 0) {
+                noResults.classList.add('show');
+            }
+        } else {
+            // Если нет поиска и выбраны все категории - показываем все
+            cards.forEach(card => {
+                card.classList.remove('hidden');
+                foundCount++;
+            });
+            visibleSections = sections.length;
+        }
+        
+        updateSearchStats(foundCount);
+        
+        // Прокрутка к результатам если есть поиск
+        if (searchTerm && foundCount > 0) {
+            const firstVisibleCard = document.querySelector('.card:not(.hidden)');
+            if (firstVisibleCard) {
+                firstVisibleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    }
+    
+    // Проверка совпадения карточки с поиском
+    function isCardMatch(cardData, searchTerm, category) {
+        // Проверка категории
+        if (category !== 'all') {
+            const categoryMap = {
+                'light-cars': 'Легковые',
+                'crossovers': 'Кроссоверы',
+                'commercial': 'Коммерческие',
+                'electro': ['Электромобили', 'Гибриды']
+            };
+            
+            const targetCategory = categoryMap[category];
+            const cardCategory = cardData.category || '';
+            
+            if (Array.isArray(targetCategory)) {
+                if (!targetCategory.includes(cardCategory)) {
+                    return false;
+                }
+            } else if (cardCategory !== targetCategory) {
+                return false;
+            }
+        }
+        
+        // Если нет поискового запроса - показываем карточку
+        if (!searchTerm) return true;
+        
+        // Проверка поискового запроса во всех полях
+        const searchFields = [
+            cardData.title || '',
+            cardData.description || '',
+            cardData.price || '',
+            ...(cardData.features || [])
+        ];
+        
+        const searchText = searchFields.join(' ').toLowerCase();
+        const terms = searchTerm.split(' ').filter(term => term.length > 0);
+        
+        // Поиск по всем словам (AND логика)
+        return terms.every(term => searchText.includes(term));
+    }
+    
+    // Подсветка найденных совпадений
+    function highlightMatches(card, cardData, searchTerm) {
+        const terms = searchTerm.split(' ').filter(term => term.length > 0);
+        const elementsToHighlight = [
+            { element: card.querySelector('.card-title'), text: cardData.title || '' },
+            { element: card.querySelector('.card-description'), text: cardData.description || '' }
+        ];
+        
+        elementsToHighlight.forEach(item => {
+            if (item.element && item.text) {
+                let highlightedText = item.text;
+                terms.forEach(term => {
+                    const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
+                    highlightedText = highlightedText.replace(regex, '<span class="highlight">$1</span>');
+                });
+                item.element.innerHTML = highlightedText;
+            }
+        });
+    }
+    
+    // Экранирование специальных символов для RegExp
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    // Обновление статистики поиска
+    function updateSearchStats(foundCount = null) {
+        const totalCount = cards.length;
+        foundCount = foundCount !== null ? foundCount : totalCount;
+        
+        totalCountEl.textContent = totalCount;
+        foundCountEl.textContent = foundCount;
+        
+        // Обновляем цвет счетчика
+        if (foundCount === totalCount) {
+            foundCountEl.style.color = '';
+        } else if (foundCount > 0) {
+            foundCountEl.style.color = '#28a745'; // зеленый
+        } else {
+            foundCountEl.style.color = '#dc3545'; // красный
+        }
+    }
+    
+    // Модальное окно (существующий код)
     const modal = document.getElementById('carModal');
     const closeBtn = document.querySelector('.close');
 
-// Функция показа деталей автомобиля
-async function showCarDetails(carId) {
-    try {
-        console.log(`Запрашиваю данные для автомобиля: ${carId}`);
-        
-        const response = await fetch(`http://localhost:8080/api/cars/${carId}`);
-        console.log('Ответ сервера:', response.status);
-        
-        if (!response.ok) {
-            if (response.status === 404) {
-                alert('Автомобиль не найден в базе данных');
-            } else {
-                throw new Error(`Ошибка сервера: ${response.status}`);
-            }
-            return;
-        }
-        
-        const car = await response.json();
-        console.log('Полученные данные:', car);
-        
-        // Заполняем модальное окно данными
-        document.getElementById('modalCarTitle').textContent = car.title || car.model;
-        document.getElementById('modalPrice').textContent = `от ${car.price} ₽`;
-        document.getElementById('modalImage').src = car.image;
-        document.getElementById('modalImage').alt = car.title || car.model;
-        document.getElementById('modalDescription').textContent = car.description || 'Описание отсутствует';
-
-        // Заполняем технические характеристики
-        const techSpecsList = document.getElementById('techSpecs');
-        techSpecsList.innerHTML = '';
-        
-        if (car.techSpecs && car.techSpecs.length > 0) {
-            car.techSpecs.forEach(spec => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span class="spec-name">${spec.name || spec}</span><span class="spec-value">${spec.value || ''}</span>`;
-                techSpecsList.appendChild(li);
-            });
-        } else {
-            techSpecsList.innerHTML = '<li>Характеристики отсутствуют</li>';
-        }
-
-        // Заполняем комплектацию
-        const equipmentList = document.getElementById('equipmentSpecs');
-        equipmentList.innerHTML = '';
-        
-        if (car.equipment && car.equipment.length > 0) {
-            car.equipment.forEach(item => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span class="spec-name">${item.name || item}</span><span class="spec-value">${item.value || ''}</span>`;
-                equipmentList.appendChild(li);
-            });
-        } else {
-            equipmentList.innerHTML = '<li>Комплектация не указана</li>';
-        }
-
-        // Заполняем особенности
-        const featuresGrid = document.getElementById('featuresGrid');
-        featuresGrid.innerHTML = '';
-        
-        if (car.features && car.features.length > 0) {
-            car.features.forEach(feature => {
-                const div = document.createElement('div');
-                div.className = 'feature-item';
-                div.textContent = feature;
-                featuresGrid.appendChild(div);
-            });
-        } else {
-            featuresGrid.innerHTML = '<div class="feature-item">Особенности не указаны</div>';
-        }
-
-        // Показываем модальное окно
-        modal.style.display = 'block';
-        
-    } catch (error) {
-        console.error('Error loading car details:', error);
-        alert(`Ошибка при загрузке данных автомобиля: ${error.message}`);
-    }
-}
-
-// Закрываем модальное окно
-closeBtn.addEventListener('click', function() {
-    modal.style.display = 'none';
-});
-
-window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-        modal.style.display = 'none';
-    }
-});
-
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        modal.style.display = 'none';
-    }
-});
-
-// Для отладки: проверим, что все модели доступны
-async function checkAllModels() {
-    const models = ['logan', 'sandero', 'stepway', 'duster', 'kaptur', 'arkana', 'loganvan', 'kangoo', 'trafic', 'zoe', 'megane', 'captur'];
-    
-    console.log('Проверка доступности моделей...');
-    
-    for (const model of models) {
+    async function showCarDetails(carId) {
         try {
-            const response = await fetch(`http://localhost:8080/api/cars/${model}`);
-            console.log(`${model}: ${response.ok ? '✅ OK' : '❌ Not found'}`);
+            console.log(`Запрашиваю данные для автомобиля: ${carId}`);
+            
+            const response = await fetch(`http://localhost:8080/api/cars/${carId}`);
+            console.log('Ответ сервера:', response.status);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    alert('Автомобиль не найден в базе данных');
+                } else {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+                return;
+            }
+            
+            const car = await response.json();
+            console.log('Полученные данные:', car);
+            
+            // Заполняем модальное окно данными
+            document.getElementById('modalCarTitle').textContent = car.title || car.model;
+            document.getElementById('modalPrice').textContent = `от ${car.price} ₽`;
+            document.getElementById('modalImage').src = car.image;
+            document.getElementById('modalImage').alt = car.title || car.model;
+            document.getElementById('modalDescription').textContent = car.description || 'Описание отсутствует';
+
+            // Заполняем технические характеристики
+            const techSpecsList = document.getElementById('techSpecs');
+            techSpecsList.innerHTML = '';
+            
+            if (car.techSpecs && car.techSpecs.length > 0) {
+                car.techSpecs.forEach(spec => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="spec-name">${spec.name || spec}</span><span class="spec-value">${spec.value || ''}</span>`;
+                    techSpecsList.appendChild(li);
+                });
+            } else {
+                techSpecsList.innerHTML = '<li>Характеристики отсутствуют</li>';
+            }
+
+            // Заполняем комплектацию
+            const equipmentList = document.getElementById('equipmentSpecs');
+            equipmentList.innerHTML = '';
+            
+            if (car.equipment && car.equipment.length > 0) {
+                car.equipment.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="spec-name">${item.name || item}</span><span class="spec-value">${item.value || ''}</span>`;
+                    equipmentList.appendChild(li);
+                });
+            } else {
+                equipmentList.innerHTML = '<li>Комплектация не указана</li>';
+            }
+
+            // Заполняем особенности
+            const featuresGrid = document.getElementById('featuresGrid');
+            featuresGrid.innerHTML = '';
+            
+            if (car.features && car.features.length > 0) {
+                car.features.forEach(feature => {
+                    const div = document.createElement('div');
+                    div.className = 'feature-item';
+                    div.textContent = feature;
+                    featuresGrid.appendChild(div);
+                });
+            } else {
+                featuresGrid.innerHTML = '<div class="feature-item">Особенности не указаны</div>';
+            }
+
+            // Показываем модальное окно
+            modal.style.display = 'block';
+            
         } catch (error) {
-            console.log(`${model}: ❌ Error - ${error.message}`);
+            console.error('Error loading car details:', error);
+            alert(`Ошибка при загрузке данных автомобиля: ${error.message}`);
         }
     }
-}
+
+    // Закрываем модальное окно
+    closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            modal.style.display = 'none';
+        }
+    });
+    
+    // Инициализация поиска при загрузке страницы
+    document.addEventListener('DOMContentLoaded', initSearch);
 </script>
 </body>
 </html>
