@@ -1170,3 +1170,34 @@ async function showCarDetails(carModel) {
 
 // Загружаем данные при загрузке страницы
 document.addEventListener('DOMContentLoaded', loadCarData);
+
+function openPrivacyModal() {
+            document.getElementById('privacyModal').style.display = 'block';
+        }
+        
+        function openTermsModal() {
+            document.getElementById('termsModal').style.display = 'block';
+        }
+        
+        // Закрытие модальных окон
+        document.querySelectorAll('.modal-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+        
+        // Закрытие при клике вне окна
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+        
+        // Закрытие на Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+        });

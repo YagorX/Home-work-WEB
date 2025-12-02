@@ -43,6 +43,18 @@ func InitDB() error {
 		return err
 	}
 
+	// Создаем таблицы для автомобилей
+	err = createCarsTables()
+	if err != nil {
+		return err
+	}
+
+	// Заполняем данными автомобилей
+	err = SeedCarsData()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -133,6 +145,74 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func createCarsTables() error {
+	// Таблица автомобилей
+	query := `
+    CREATE TABLE IF NOT EXISTS cars (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        model TEXT UNIQUE NOT NULL,
+        title TEXT NOT NULL,
+        price TEXT NOT NULL,
+        image TEXT NOT NULL,
+        description TEXT NOT NULL,
+        category TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`
+
+	_, err := DB.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creating cars table: %v", err)
+	}
+
+	// Таблица технических характеристик
+	query = `
+    CREATE TABLE IF NOT EXISTS car_specs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        car_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        value TEXT NOT NULL,
+        spec_type TEXT NOT NULL,
+        FOREIGN KEY (car_id) REFERENCES cars (id) ON DELETE CASCADE
+    )`
+
+	_, err = DB.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creating car_specs table: %v", err)
+	}
+
+	// Таблица комплектаций
+	query = `
+    CREATE TABLE IF NOT EXISTS car_equipment (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        car_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        value TEXT NOT NULL,
+        FOREIGN KEY (car_id) REFERENCES cars (id) ON DELETE CASCADE
+    )`
+
+	_, err = DB.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creating car_equipment table: %v", err)
+	}
+
+	// Таблица особенностей
+	query = `
+    CREATE TABLE IF NOT EXISTS car_features (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        car_id INTEGER NOT NULL,
+        feature TEXT NOT NULL,
+        FOREIGN KEY (car_id) REFERENCES cars (id) ON DELETE CASCADE
+    )`
+
+	_, err = DB.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creating car_features table: %v", err)
+	}
+
+	log.Println("Cars tables created or already exist")
+	return nil
 }
 
 // DeleteUser удаляет пользователя (для отладки)

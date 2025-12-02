@@ -30,6 +30,8 @@ func main() {
 	// Настройка роутера
 	router := mux.NewRouter()
 
+	carHandler := handlers.NewCarHandler()
+
 	// Маршруты API
 	api := router.PathPrefix("/api").Subrouter()
 
@@ -42,6 +44,10 @@ func main() {
 
 	// Отладочные маршруты (в продакшене убрать или защитить)
 	api.HandleFunc("/users", authHandler.GetAllUsers).Methods("GET")
+
+	api.HandleFunc("/cars", carHandler.GetAllCars).Methods("GET")
+	api.HandleFunc("/cars/{model}", carHandler.GetCarByModel).Methods("GET")
+	api.HandleFunc("/cars/category/{category}", carHandler.GetCarsByCategory).Methods("GET")
 
 	// Настройка CORS
 	corsHandler := cors.New(cors.Options{

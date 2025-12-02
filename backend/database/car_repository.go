@@ -2,8 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
 	"renault-backend/models"
 )
 
@@ -15,54 +13,80 @@ func NewCarRepository() *CarRepository {
 	return &CarRepository{db: DB}
 }
 
-// CreateCar создает новую запись об автомобиле
+// CreateCar создает автомобиль со всеми деталями
 func (r *CarRepository) CreateCar(car *models.Car, details *models.CarDetails) error {
-	// Преобразуем массивы в JSON
-	techSpecsJSON, err := json.Marshal(details.TechSpecs)
+	// Начинаем транзакцию
+	tx, err := r.db.Begin()
 	if err != nil {
-		return fmt.Errorf("error marshaling tech specs: %v", err)
+		return err
 	}
 
-	equipmentJSON, err := json.Marshal(details.Equipment)
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Вставляем основной автомобиль
+	query := `INSERT INTO cars (model, title, price, category, image, description) 
+              VALUES (?, ?, ?, ?, ?, ?)`
+
+	result, err := tx.Exec(query, car.Model, car.Title, car.Price,
+		car.Category, car.Image, car.Description)
 	if err != nil {
-		return fmt.Errorf("error marshaling equipment: %v", err)
+		return err
 	}
 
-	featuresJSON, err := json.Marshal(details.Features)
+	// Получаем ID созданного автомобиля
+	carID, err := result.LastInsertId()
 	if err != nil {
-		return fmt.Errorf("error marshaling features: %v", err)
+		return err
 	}
 
-	query := `
-    INSERT INTO cars (model, title, price, category, image, description, 
-                     tech_specs_json, equipment_json, features_json)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
+	// Добавляем технические характеристики
+	for _, spec := range details.TechSpecs {
+		query = `INSERT INTO car_specs (car_id, name, value, spec_type) 
+                 VALUES (?, ?, ?, 'tech')`
+		_, err = tx.Exec(query, carID, spec.Name, spec.Value)
+		if err != nil {
+			return err
+		}
+	}
 
-	_, err = r.db.Exec(query, car.Model, car.Title, car.Price, car.Category,
-		car.Image, car.Description, techSpecsJSON, equipmentJSON, featuresJSON)
+	// Добавляем комплектацию
+	for _, eq := range details.Equipment {
+		query = `INSERT INTO car_specs (car_id, name, value, spec_type) 
+                 VALUES (?, ?, ?, 'equipment')`
+		_, err = tx.Exec(query, carID, eq.Name, eq.Value)
+		if err != nil {
+			return err
+		}
+	}
 
-	return err
+	// Добавляем особенности
+	for _, feature := range details.Features {
+		query = `INSERT INTO car_features (car_id, feature) VALUES (?, ?)`
+		_, err = tx.Exec(query, carID, feature)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Коммитим транзакцию
+	return tx.Commit()
 }
 
-// GetCarByModel возвращает автомобиль по модели
-func (r *CarRepository) GetCarByModel(model string) (*models.Car, *models.CarDetails, error) {
-	query := `
-    SELECT id, model, title, price, category, image, description,
-           tech_specs_json, equipment_json, features_json, created_at
-    FROM cars WHERE model = ?
-    `
-
-	row := r.db.QueryRow(query, model)
+// GetCarWithDetails возвращает автомобиль со всеми деталями
+func (r *CarRepository) GetCarWithDetails(model string) (*models.Car, *models.CarDetails, error) {
+	// Получаем основной автомобиль
+	query := `SELECT id, model, title, price, category, image, description, created_at 
+              FROM cars WHERE model = ?`
 
 	var car models.Car
-	var techSpecsJSON, equipmentJSON, featuresJSON string
-	var details models.CarDetails
-
-	err := row.Scan(&car.ID, &car.Model, &car.Title, &car.Price, &car.Category,
-		&car.Image, &car.Description, &techSpecsJSON, &equipmentJSON,
-		&featuresJSON, &car.CreatedAt)
-
+	err := r.db.QueryRow(query, model).Scan(
+		&car.ID, &car.Model, &car.Title, &car.Price, &car.Category,
+		&car.Image, &car.Description, &car.CreatedAt,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil, nil
@@ -70,17 +94,56 @@ func (r *CarRepository) GetCarByModel(model string) (*models.Car, *models.CarDet
 		return nil, nil, err
 	}
 
-	// Преобразуем JSON обратно в структуры
-	if err := json.Unmarshal([]byte(techSpecsJSON), &details.TechSpecs); err != nil {
-		return nil, nil, fmt.Errorf("error unmarshaling tech specs: %v", err)
+	// Получаем технические характеристики
+	var details models.CarDetails
+
+	query = `SELECT name, value FROM car_specs 
+             WHERE car_id = ? AND spec_type = 'tech'`
+	rows, err := r.db.Query(query, car.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var spec models.CarSpec
+		if err := rows.Scan(&spec.Name, &spec.Value); err != nil {
+			return nil, nil, err
+		}
+		details.TechSpecs = append(details.TechSpecs, spec)
 	}
 
-	if err := json.Unmarshal([]byte(equipmentJSON), &details.Equipment); err != nil {
-		return nil, nil, fmt.Errorf("error unmarshaling equipment: %v", err)
+	// Получаем комплектацию
+	query = `SELECT name, value FROM car_specs 
+             WHERE car_id = ? AND spec_type = 'equipment'`
+	rows, err = r.db.Query(query, car.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var spec models.CarSpec
+		if err := rows.Scan(&spec.Name, &spec.Value); err != nil {
+			return nil, nil, err
+		}
+		details.Equipment = append(details.Equipment, spec)
 	}
 
-	if err := json.Unmarshal([]byte(featuresJSON), &details.Features); err != nil {
-		return nil, nil, fmt.Errorf("error unmarshaling features: %v", err)
+	// Получаем особенности
+	query = `SELECT feature FROM car_features WHERE car_id = ?`
+	rows, err = r.db.Query(query, car.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var feature string
+		if err := rows.Scan(&feature); err != nil {
+			return nil, nil, err
+		}
+		details.Features = append(details.Features, feature)
 	}
 
 	return &car, &details, nil
@@ -88,7 +151,9 @@ func (r *CarRepository) GetCarByModel(model string) (*models.Car, *models.CarDet
 
 // GetAllCars возвращает все автомобили
 func (r *CarRepository) GetAllCars() ([]models.Car, error) {
-	query := `SELECT id, model, title, price, category, image, created_at FROM cars ORDER BY category, title`
+	query := `SELECT id, model, title, price, category, image, description, created_at 
+              FROM cars ORDER BY category, title`
+
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -98,8 +163,10 @@ func (r *CarRepository) GetAllCars() ([]models.Car, error) {
 	var cars []models.Car
 	for rows.Next() {
 		var car models.Car
-		err := rows.Scan(&car.ID, &car.Model, &car.Title, &car.Price,
-			&car.Category, &car.Image, &car.CreatedAt)
+		err := rows.Scan(
+			&car.ID, &car.Model, &car.Title, &car.Price, &car.Category,
+			&car.Image, &car.Description, &car.CreatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -111,8 +178,9 @@ func (r *CarRepository) GetAllCars() ([]models.Car, error) {
 
 // GetCarsByCategory возвращает автомобили по категории
 func (r *CarRepository) GetCarsByCategory(category string) ([]models.Car, error) {
-	query := `SELECT id, model, title, price, category, image, created_at 
+	query := `SELECT id, model, title, price, category, image, description, created_at 
               FROM cars WHERE category = ? ORDER BY title`
+
 	rows, err := r.db.Query(query, category)
 	if err != nil {
 		return nil, err
@@ -122,8 +190,10 @@ func (r *CarRepository) GetCarsByCategory(category string) ([]models.Car, error)
 	var cars []models.Car
 	for rows.Next() {
 		var car models.Car
-		err := rows.Scan(&car.ID, &car.Model, &car.Title, &car.Price,
-			&car.Category, &car.Image, &car.CreatedAt)
+		err := rows.Scan(
+			&car.ID, &car.Model, &car.Title, &car.Price, &car.Category,
+			&car.Image, &car.Description, &car.CreatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -133,9 +203,24 @@ func (r *CarRepository) GetCarsByCategory(category string) ([]models.Car, error)
 	return cars, nil
 }
 
-// DeleteCar удаляет автомобиль
-func (r *CarRepository) DeleteCar(model string) error {
-	query := `DELETE FROM cars WHERE model = ?`
-	_, err := r.db.Exec(query, model)
-	return err
+// GetCategories возвращает список всех категорий
+func (r *CarRepository) GetCategories() ([]string, error) {
+	query := `SELECT DISTINCT category FROM cars ORDER BY category`
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categories []string
+	for rows.Next() {
+		var category string
+		if err := rows.Scan(&category); err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+
+	return categories, nil
 }
