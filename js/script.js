@@ -1070,3 +1070,103 @@ testBtn.style.cssText = `
 `;
 testBtn.addEventListener('click', checkServerConnection);
 document.body.appendChild(testBtn);
+
+async function loadCarData() {
+    try {
+        const response = await fetch('/api/cars');
+        const cars = await response.json();
+        
+        // Очищаем существующие карточки
+        const sections = document.querySelectorAll('.cards-grid');
+        sections.forEach(section => section.innerHTML = '');
+        
+        // Создаем карточки для каждого автомобиля
+        cars.forEach(car => {
+            createCarCard(car);
+        });
+    } catch (error) {
+        console.error('Error loading car data:', error);
+        // В случае ошибки показываем статические данные
+        console.log('Using static data');
+    }
+}
+
+// Функция создания карточки автомобиля
+function createCarCard(car) {
+    // Находим нужную секцию по категории
+    const section = document.getElementById(car.category);
+    if (!section) return;
+    
+    const cardsGrid = section.querySelector('.cards-grid');
+    if (!cardsGrid) return;
+    
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    card.innerHTML = `
+        <img class="card-image" src="${car.image}" alt="${car.title}">
+        <div class="card-content">
+            <h3 class="card-title">${car.title}</h3>
+            <div class="card-price">${car.price}</div>
+            <button class="card-button" onclick="showCarDetails('${car.model}')">Подробнее</button>
+        </div>
+    `;
+    
+    cardsGrid.appendChild(card);
+}
+
+// Функция показа деталей автомобиля (обновленная)
+async function showCarDetails(carModel) {
+    try {
+        const response = await fetch(`/api/car?model=${carModel}`);
+        const data = await response.json();
+        
+        const car = data.car;
+        const details = data.details;
+        
+        // Заполняем модальное окно данными
+        document.getElementById('modalCarTitle').textContent = car.title;
+        document.getElementById('modalPrice').textContent = car.price;
+        document.getElementById('modalImage').src = car.image;
+        document.getElementById('modalImage').alt = car.title;
+        document.getElementById('modalDescription').textContent = car.description;
+
+        // Заполняем технические характеристики
+        const techSpecsList = document.getElementById('techSpecs');
+        techSpecsList.innerHTML = '';
+        details.techSpecs.forEach(spec => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="spec-name">${spec.name}</span><span class="spec-value">${spec.value}</span>`;
+            techSpecsList.appendChild(li);
+        });
+
+        // Заполняем комплектацию
+        const equipmentList = document.getElementById('equipmentSpecs');
+        equipmentList.innerHTML = '';
+        details.equipment.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="spec-name">${item.name}</span><span class="spec-value">${item.value}</span>`;
+            equipmentList.appendChild(li);
+        });
+
+        // Заполняем особенности
+        const featuresGrid = document.getElementById('featuresGrid');
+        featuresGrid.innerHTML = '';
+        details.features.forEach(feature => {
+            const div = document.createElement('div');
+            div.className = 'feature-item';
+            div.textContent = feature;
+            featuresGrid.appendChild(div);
+        });
+
+        // Показываем модальное окно
+        modal.style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error loading car details:', error);
+        alert('Ошибка при загрузке данных автомобиля');
+    }
+}
+
+// Загружаем данные при загрузке страницы
+document.addEventListener('DOMContentLoaded', loadCarData);

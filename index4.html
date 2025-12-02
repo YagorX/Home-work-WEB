@@ -7,19 +7,62 @@
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-    <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 class="modal-title">Регистрация</h2>
-            <form class="modal-form">
-                <input type="text" class="modal-input" placeholder="Логин" required>
-                <input type="email" class="modal-input" placeholder="Email" required>
-                <input type="password" class="modal-input" placeholder="Пароль" required>
-                <input type="password" class="modal-input" placeholder="Повторите пароль" required>
-                <button type="submit" class="modal-submit">Зарегистрироваться</button>
-            </form>
+   <div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="modal-title">Регистрация</h2>
+        
+        <div class="password-rules">
+            <h4>🔒 Требования к паролю:</h4>
+            <ul>
+                <li>Минимум 8 символов</li>
+                <li>Хотя бы одна заглавная буква</li>
+                <li>Хотя бы одна строчная буква</li>
+                <li>Хотя бы одна цифра</li>
+                <li>Хотя бы один специальный символ (!@#$%^&*)</li>
+                <li>Не использовать простые пароли</li>
+                <li>Не использовать последовательности (abc, 123)</li>
+                <li>Не использовать повторяющиеся символы</li>
+            </ul>
         </div>
+        
+        <form class="modal-form" id="registerForm">
+            <div class="form-group">
+                <input type="text" class="modal-input" id="regUsername" placeholder="Логин" required>
+                <small class="form-hint" style="display: none; color: #666; font-size: 12px; margin-top: 5px;">
+                    Минимум 3 символа, только буквы, цифры и . _ -
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <input type="email" class="modal-input" id="regEmail" placeholder="Email" required>
+                <small class="form-hint" style="display: none; color: #666; font-size: 12px; margin-top: 5px;">
+                    Введите действующий email адрес
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" class="modal-input" id="regPassword" placeholder="Пароль" required>
+                <div id="passwordStrength"></div>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" class="modal-input" id="regConfirmPassword" placeholder="Повторите пароль" required>
+                <div id="passwordMatch" style="display: none; margin-top: 5px; font-size: 12px;"></div>
+            </div>
+            
+            <div id="passwordErrors"></div>
+            
+            <button type="submit" class="modal-submit" id="submitBtn">
+                Зарегистрироваться
+            </button>
+            
+            <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                Уже есть аккаунт? <a href="#" id="switchToLogin" style="color: #3498db; text-decoration: none;">Войти</a>
+            </div>
+        </form>
     </div>
+</div>
 
 	<header class="header">
         <div class="header-container">
@@ -233,48 +276,7 @@
         </div>
     </footer>
 
-    
-    <script>
-        // Получаем элементы модального окна
-        const modal = document.getElementById('registerModal');
-        const registerLink = document.getElementById('registerLink');
-        const closeBtn = document.querySelector('.close');
-
-        // Открываем модальное окно при клике на "регистрация"
-        registerLink.addEventListener('click', function() {
-            modal.style.display = 'block';
-        });
-
-        // Закрываем модальное окно при клике на крестик
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-
-        // Закрываем модальное окно при клике вне его
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        // Закрываем модальное окно при нажатии Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                modal.style.display = 'none';
-            }
-        });
-
-        // Обработка формы регистрации
-        const registerForm = document.querySelector('.modal-form');
-        registerForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            // Здесь можно добавить логику обработки регистрации
-            alert('Регистрация успешно завершена!');
-            modal.style.display = 'none';
-            registerForm.reset();
-        });
-    </script>
-
+    <script src="js/script.js"></script>
 
 </body>
 </html>
