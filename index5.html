@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог Renault</title>
+    <link rel="stylesheet" href="styles/style2.css">
+</head>
+<body>
+    <!-- Контейнер с размытым фоном и кнопкой -->
+    <div class="home-button-container">
+        <a href="index.html" class="home-button">На главную</a>
+    </div>
+
+    <!-- Модальное окно для деталей -->
+    <div id="carModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <img class="modal-image" id="modalImage" src="" alt="Автомобиль">
+                <div class="modal-title">
+                    <h2 id="modalCarTitle">Название модели</h2>
+                    <div class="modal-price" id="modalPrice">от 0 ₽</div>
+                </div>
+            </div>
+            
+            <div class="modal-description" id="modalDescription">
+                Описание автомобиля...
+            </div>
+            
+            <div class="modal-specs">
+                <div class="spec-group">
+                    <h3>Технические характеристики</h3>
+                    <ul class="spec-list" id="techSpecs">
+                        <!-- Заполняется JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="spec-group">
+                    <h3>Комплектация</h3>
+                    <ul class="spec-list" id="equipmentSpecs">
+                        <!-- Заполняется JavaScript -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="modal-features">
+                <h3>Ключевые особенности</h3>
+                <div class="features-grid" id="featuresGrid">
+                    <!-- Заполняется JavaScript -->
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="test-drive-btn">Записаться на тест-драйв</button>
+                <button class="contact-btn">Связаться с менеджером</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="catalog-container">
+        <h1 class="catalog-title">Каталог Renault</h1>
+
+        <!-- Раздел 1: Легковые автомобили -->
+        <div class="section" id="light-cars">
+            <h2 class="section-title">Легковые автомобили</h2>
+            <div class="cards-grid">
+                
+                <div class="card">
+                    <img class="card-image" src="images/renault_logan.jpeg" alt="Renault Logan">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Logan</h3>
+                        <p class="card-description">Надежный седан для города и трассы. Идеальное сочетание цены и качества.</p>
+                        <ul class="card-features">
+                            <li>Расход: 6.1 л/100км</li>
+                            <li>Мощность: 82 л.с.</li>
+                            <li>Объем багажника: 510 л</li>
+                        </ul>
+                        <div class="card-price">от 950 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('logan')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img class="card-image" src="images/renault_sander.jpg" alt="Renault Sandero">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Sandero</h3>
+                        <p class="card-description">Компактный хэтчбек с просторным салоном и экономичным двигателем.</p>
+                        <ul class="card-features">
+                            <li>Расход: 5.8 л/100км</li>
+                            <li>Мощность: 75 л.с.</li>
+                            <li>5-ступенчатая МКПП</li>
+                        </ul>
+                        <div class="card-price">от 890 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('sandero')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img class="card-image" src="images/renault_sander_stepway.jpeg" alt="Renault Sandero Stepway">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Sandero Stepway</h3>
+                        <p class="card-description">Хэтчбек в кросс-кузове с увеличенным клиренсом и стильным дизайном.</p>
+                        <ul class="card-features">
+                            <li>Клиренс: 195 мм</li>
+                            <li>Мощность: 90 л.с.</li>
+                            <li>Защита бампера</li>
+                        </ul>
+                        <div class="card-price">от 1 100 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('stepway')">Подробнее</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Раздел 2: Кроссоверы -->
+        <div class="section" id="crossovers">
+            <h2 class="section-title">Кроссоверы</h2>
+            <div class="cards-grid">
+                
+                <div class="card">
+                    <img class="card-image" src="images/duster.jpeg" alt="Renault Duster">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Duster</h3>
+                        <p class="card-description">Легендарный внедорожник с полным приводом. Покоритель любых дорог.</p>
+                        <ul class="card-features">
+                            <li>Полный привод 4x4</li>
+                            <li>Мощность: 114 л.с.</li>
+                            <li>Клиренс: 210 мм</li>
+                        </ul>
+                        <div class="card-price">от 1 450 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('duster')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img class="card-image" src="images/kapture.jpeg" alt="Renault Kaptur">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Kaptur</h3>
+                        <p class="card-description">Стильный компактный кроссовер с передовыми технологиями безопасности.</p>
+                        <ul class="card-features">
+                            <li>Система ESP</li>
+                            <li>Мощность: 113 л.с.</li>
+                            <li>Мультимедиа R-Link</li>
+                        </ul>
+                        <div class="card-price">от 1 350 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('kaptur')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img class="card-image" src="images/arkana.jpeg" alt="Renault Arkana">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Arkana</h3>
+                        <p class="card-description">Элегантное кросс-купе с динамичным характером и просторным салоном.</p>
+                        <ul class="card-features">
+                            <li>Купе-форма</li>
+                            <li>Мощность: 150 л.с.</li>
+                            <li>Вариатор X-Tronic</li>
+                        </ul>
+                        <div class="card-price">от 1 650 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('arkana')">Подробнее</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Раздел 3: Коммерческие автомобили -->
+        <div class="section" id="commercial">
+            <h2 class="section-title">Коммерческие автомобили</h2>
+            <div class="cards-grid">
+                
+                <div class="card">
+                    <img class="card-image" src="images/van.jpeg" alt="Renault Logan Van">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Logan Van</h3>
+                        <p class="card-description">Коммерческая версия Logan с увеличенным багажным отделением.</p>
+                        <ul class="card-features">
+                            <li>Объем багажника: 800 л</li>
+                            <li>Грузоподъемность: 500 кг</li>
+                            <li>Низкий расход топлива</li>
+                        </ul>
+                        <div class="card-price">от 1 000 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('loganvan')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img class="card-image" src="images/kangoo.jpeg" alt="Renault Kangoo">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Kangoo</h3>
+                        <p class="card-description">Компактный коммерческий автомобиль с отличной маневренностью.</p>
+                        <ul class="card-features">
+                            <li>Объем: 3-4.6 м³</li>
+                            <li>Грузоподъемность: 650 кг</li>
+                            <li>Сдвижные двери</li>
+                        </ul>
+                        <div class="card-price">от 1 300 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('kangoo')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <img class="card-image" src="images/trafic.jpg" alt="Renault Trafic">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Trafic</h3>
+                        <p class="card-description">Универсальный коммерческий автомобиль для перевозки грузов.</p>
+                        <ul class="card-features">
+                            <li>Объем: 5.2-8.6 м³</li>
+                            <li>Грузоподъемность: 1-1.5 т</li>
+                            <li>Дизельный двигатель</li>
+                        </ul>
+                        <div class="card-price">от 1 800 000 ₽</div>
+                        <button class="card-button" onclick="showCarDetails('trafic')">Подробнее</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Раздел 4: Электромобили и гибриды -->
+        <div class="section" id="electro">
+            <h2 class="section-title">Электромобили и гибриды</h2>
+            <div class="cards-grid">
+                
+                <div class="card ev-card">
+                    <img class="card-image" src="images/zoe.jpeg" alt="Renault ZOE">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault ZOE</h3>
+                        <p class="card-description">Компактный электромобиль для города с впечатляющим запасом хода.</p>
+                        <ul class="card-features ev-features">
+                            <li>Запас хода: 395 км</li>
+                            <li>Мощность: 135 л.с.</li>
+                            <li>Быстрая зарядка за 30 мин</li>
+                        </ul>
+                        <div class="card-price ev-price">от 2 200 000 ₽</div>
+                        <button class="card-button ev-button" onclick="showCarDetails('zoe')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card ev-card">
+                    <img class="card-image" src="images/megane e.jpg" alt="Renault Megane E-Tech">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Megane E-Tech</h3>
+                        <p class="card-description">Современный электрокроссовер с технологиями нового поколения.</p>
+                        <ul class="card-features ev-features">
+                            <li>Запас хода: 470 км</li>
+                            <li>Мощность: 220 л.с.</li>
+                            <li>Цифровая панель 12,3"</li>
+                        </ul>
+                        <div class="card-price ev-price">от 3 500 000 ₽</div>
+                        <button class="card-button ev-button" onclick="showCarDetails('megane')">Подробнее</button>
+                    </div>
+                </div>
+
+                <div class="card ev-card">
+                    <img class="card-image" src="images/captur e.jpg" alt="Renault Captur E-Tech">
+                    <div class="card-content">
+                        <h3 class="card-title">Renault Captur E-Tech</h3>
+                        <p class="card-description">Гибридный кроссовер с экономичным расходом и отличной динамикой.</p>
+                        <ul class="card-features ev-features">
+                            <li>Гибридная система</li>
+                            <li>Расход: 4.5 л/100км</li>
+                            <li>Электро-привод на малых скоростях</li>
+                        </ul>
+                        <div class="card-price ev-price">от 1 900 000 ₽</div>
+                        <button class="card-button ev-button" onclick="showCarDetails('captur')">Подробнее</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Данные для всех моделей автомобилей
+        const carData = {
+    'logan': {
+        title: 'Renault Logan',
+        price: 'от 950 000 ₽',
+        image: 'images/renault_logan.jpeg',
+        description: 'Renault Logan - это надежный и практичный седан, который идеально подходит для городских поездок и длительных путешествий. Сочетает в себе комфорт, экономичность и доступную цену.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л, 82 л.с.' },
+            { name: 'Коробка передач', value: '5-ступенчатая МКПП' },
+            { name: 'Расход топлива', value: '6.1 л/100км' },
+            { name: 'Разгон 0-100 км/ч', value: '11.9 сек' },
+            { name: 'Объем багажника', value: '510 л' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: 'Есть' },
+            { name: 'Электростеклоподъемники', value: 'Все' },
+            { name: 'Аудиосистема', value: 'Radio Media Nav' },
+            { name: 'Кондиционер', value: 'Есть' },
+            { name: 'Круиз-контроль', value: 'Опция' },
+            { name: 'Парктроник', value: 'Опция' }
+        ],
+        features: [
+            'Система ABS+EBD',
+            'Подушки безопасности',
+            'Центральный замок',
+            'Иммобилайзер',
+            'Регулируемый руль',
+            'Складывающиеся задние сиденья'
+        ]
+    },
+    'sandero': {
+        title: 'Renault Sandero',
+        price: 'от 890 000 ₽',
+        image: 'images/renault_sander.jpg',
+        description: 'Компактный хэтчбек Renault Sandero предлагает просторный салон и отличную маневренность в городских условиях. Идеальный выбор для повседневных поездок.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л, 75 л.с.' },
+            { name: 'Коробка передач', value: '5-ступенчатая МКПП' },
+            { name: 'Расход топлива', value: '5.8 л/100км' },
+            { name: 'Разгон 0-100 км/ч', value: '12.5 сек' },
+            { name: 'Объем багажника', value: '320 л' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Кондиционер', value: 'Есть' },
+            { name: 'Электростеклоподъемники', value: 'Передние' },
+            { name: 'Аудиосистема', value: 'Radio Media Nav' },
+            { name: 'Круиз-контроль', value: 'Опция' },
+            { name: 'Давление в шинах', value: 'Контроль' },
+            { name: 'Сигнализация', value: 'Есть' }
+        ],
+        features: [
+            'Система стабилизации',
+            'Передние подушки безопасности',
+            'Регулировка руля',
+            'Подогрев зеркал',
+            'Противотуманные фары',
+            'Легкосплавные диски'
+        ]
+    },
+    'stepway': {
+        title: 'Renault Sandero Stepway',
+        price: 'от 1 100 000 ₽',
+        image: 'images/renault_sander_stepway.jpeg',
+        description: 'Renault Sandero Stepway - это хэтчбек в кросс-кузове с увеличенным клиренсом и стильным дизайном. Идеален для городских приключений.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л, 90 л.с.' },
+            { name: 'Коробка передач', value: '5-ступенчатая МКПП' },
+            { name: 'Клиренс', value: '195 мм' },
+            { name: 'Расход топлива', value: '6.2 л/100км' },
+            { name: 'Объем багажника', value: '320 л' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: 'Есть' },
+            { name: 'Электростеклоподъемники', value: 'Все' },
+            { name: 'Мультимедиа', value: 'Media Nav' },
+            { name: 'Защита бампера', value: 'Есть' },
+            { name: 'Рейлинги на крыше', value: 'Есть' },
+            { name: 'Легкосплавные диски', value: '16"' }
+        ],
+        features: [
+            'Увеличенный клиренс',
+            'Защита бампера',
+            'Рейлинги на крыше',
+            'Противотуманные фары',
+            'Система стабилизации',
+            'Подогрев зеркал'
+        ]
+    },
+    'duster': {
+        title: 'Renault Duster',
+        price: 'от 1 450 000 ₽',
+        image: 'images/duster.jpeg',
+        description: 'Легендарный внедорожник Renault Duster с полным приводом готов покорить любые дороги. Проходимость, надежность и современный дизайн.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л, 114 л.с.' },
+            { name: 'Привод', value: 'Полный 4x4' },
+            { name: 'Клиренс', value: '210 мм' },
+            { name: 'Расход топлива', value: '7.2 л/100км' },
+            { name: 'Объем багажника', value: '475 л' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: '2-зонный' },
+            { name: 'Мультимедиа', value: 'Media Nav' },
+            { name: 'Круиз-контроль', value: 'Есть' },
+            { name: 'Парктроник', value: 'Передний и задний' },
+            { name: 'Камера заднего вида', value: 'Есть' },
+            { name: 'Подогрев сидений', value: 'Передние' }
+        ],
+        features: [
+            'Система полного привода',
+            'Защита картера',
+            'Рейлинги на крыше',
+            'Запасное колесо',
+            'Защита бампера',
+            'Противотуманные фары'
+        ]
+    },
+    'kaptur': {
+        title: 'Renault Kaptur',
+        price: 'от 1 350 000 ₽',
+        image: 'images/kapture.jpeg',
+        description: 'Стильный компактный кроссовер с передовыми технологиями безопасности. Идеальное сочетание городского комфорта и внедорожных возможностей.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л, 113 л.с.' },
+            { name: 'Коробка передач', value: 'Вариатор' },
+            { name: 'Клиренс', value: '204 мм' },
+            { name: 'Расход топлива', value: '6.7 л/100км' },
+            { name: 'Объем багажника', value: '387 л' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: '2-зонный' },
+            { name: 'Мультимедиа', value: 'R-Link 2' },
+            { name: 'Система ESP', value: 'Есть' },
+            { name: 'Круиз-контроль', value: 'Есть' },
+            { name: 'Камера 360°', value: 'Опция' },
+            { name: 'Бесключевой доступ', value: 'Есть' }
+        ],
+        features: [
+            'Мультимедиа R-Link',
+            'Система ESP',
+            'Камера заднего вида',
+            'Датчики парковки',
+            'Светодиодные фары',
+            'Бесключевой доступ'
+        ]
+    },
+    'arkana': {
+        title: 'Renault Arkana',
+        price: 'от 1 650 000 ₽',
+        image: 'images/arkana.jpeg',
+        description: 'Элегантное кросс-купе с динамичным характером и просторным салоном. Уникальный дизайн и передовые технологии.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.3 л, 150 л.с.' },
+            { name: 'Коробка передач', value: 'Вариатор X-Tronic' },
+            { name: 'Клиренс', value: '198 мм' },
+            { name: 'Расход топлива', value: '6.4 л/100км' },
+            { name: 'Объем багажника', value: '480 л' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: '2-зонный' },
+            { name: 'Мультимедиа', value: 'EASY LINK' },
+            { name: 'Цифровая панель', value: '7"' },
+            { name: 'Круиз-контроль', value: 'Адаптивный' },
+            { name: 'Подогрев руля', value: 'Есть' },
+            { name: 'Панорамная крыша', value: 'Опция' }
+        ],
+        features: [
+            'Купе-форма кузова',
+            'Вариатор X-Tronic',
+            'Цифровая приборная панель',
+            'Мультимедиа EASY LINK',
+            'Светодиодная оптика',
+            'Адаптивный круиз-контроль'
+        ]
+    },
+    'loganvan': {
+        title: 'Renault Logan Van',
+        price: 'от 1 000 000 ₽',
+        image: 'images/van.jpeg',
+        description: 'Коммерческая версия Logan с увеличенным багажным отделением. Надежность и экономичность для бизнеса.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л, 82 л.с.' },
+            { name: 'Коробка передач', value: '5-ступенчатая МКПП' },
+            { name: 'Объем багажника', value: '800 л' },
+            { name: 'Грузоподъемность', value: '500 кг' },
+            { name: 'Расход топлива', value: '6.3 л/100км' },
+            { name: 'Количество мест', value: '2' }
+        ],
+        equipment: [
+            { name: 'Кондиционер', value: 'Есть' },
+            { name: 'Аудиосистема', value: 'Radio' },
+            { name: 'Электростеклоподъемники', value: 'Передние' },
+            { name: 'Центральный замок', value: 'Есть' },
+            { name: 'Сигнализация', value: 'Есть' },
+            { name: 'Грузовая перегородка', value: 'Опция' }
+        ],
+        features: [
+            'Увеличенный багажник',
+            'Низкий расход топлива',
+            'Прочная подвеска',
+            'Грузовая перегородка',
+            'Защита грузового отсека',
+            'Доступная цена'
+        ]
+    },
+    'kangoo': {
+        title: 'Renault Kangoo',
+        price: 'от 1 300 000 ₽',
+        image: 'images/kangoo.jpeg',
+        description: 'Компактный коммерческий автомобиль с отличной маневренностью. Идеален для городских перевозок.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л, 90 л.с.' },
+            { name: 'Коробка передач', value: '5-ступенчатая МКПП' },
+            { name: 'Объем грузового отсека', value: '3-4.6 м³' },
+            { name: 'Грузоподъемность', value: '650 кг' },
+            { name: 'Расход топлива', value: '6.8 л/100км' },
+            { name: 'Сдвижные двери', value: '2' }
+        ],
+        equipment: [
+            { name: 'Кондиционер', value: 'Есть' },
+            { name: 'Аудиосистема', value: 'Radio' },
+            { name: 'Электростеклоподъемники', value: 'Передние' },
+            { name: 'Центральный замок', value: 'Есть' },
+            { name: 'Сигнализация', value: 'Есть' },
+            { name: 'Регулируемые сиденья', value: 'Есть' }
+        ],
+        features: [
+            'Сдвижные боковые двери',
+            'Большой грузовой объем',
+            'Хорошая маневренность',
+            'Низкий расход топлива',
+            'Простая эксплуатация',
+            'Доступное обслуживание'
+        ]
+    },
+    'trafic': {
+        title: 'Renault Trafic',
+        price: 'от 1 800 000 ₽',
+        image: 'images/trafic.jpg',
+        description: 'Универсальный коммерческий автомобиль для перевозки грузов. Надежность и вместительность.',
+        techSpecs: [
+            { name: 'Двигатель', value: '1.6 л дизель, 120 л.с.' },
+            { name: 'Коробка передач', value: '6-ступенчатая МКПП' },
+            { name: 'Объем грузового отсека', value: '5.2-8.6 м³' },
+            { name: 'Грузоподъемность', value: '1-1.5 т' },
+            { name: 'Расход топлива', value: '7.1 л/100км' },
+            { name: 'Количество мест', value: '3' }
+        ],
+        equipment: [
+            { name: 'Кондиционер', value: 'Есть' },
+            { name: 'Мультимедиа', value: 'Media Nav' },
+            { name: 'Круиз-контроль', value: 'Есть' },
+            { name: 'Электростеклоподъемники', value: 'Все' },
+            { name: 'Центральный замок', value: 'Есть' },
+            { name: 'Система ESP', value: 'Есть' }
+        ],
+        features: [
+            'Дизельный двигатель',
+            'Большой грузовой объем',
+            'Экономичный расход',
+            'Комфортная кабина',
+            'Надежная конструкция',
+            'Легкое управление'
+        ]
+    },
+    'zoe': {
+        title: 'Renault ZOE',
+        price: 'от 2 200 000 ₽',
+        image: 'images/zoe.jpeg',
+        description: 'Компактный электромобиль для города с впечатляющим запасом хода. Экологичность и современные технологии.',
+        techSpecs: [
+            { name: 'Двигатель', value: 'Электромотор, 135 л.с.' },
+            { name: 'Запас хода', value: '395 км' },
+            { name: 'Батарея', value: '52 кВт·ч' },
+            { name: 'Разгон 0-100 км/ч', value: '9.5 сек' },
+            { name: 'Быстрая зарядка', value: '30 мин до 80%' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: 'Есть' },
+            { name: 'Мультимедиа', value: 'EASY LINK' },
+            { name: 'Режимы вождения', value: '3 режима' },
+            { name: 'Регенеративное торможение', value: 'Есть' },
+            { name: 'Мобильное приложение', value: 'Есть' },
+            { name: 'Бесключевой доступ', value: 'Есть' }
+        ],
+        features: [
+            'Большой запас хода',
+            'Быстрая зарядка',
+            'Тихая работа',
+            'Нулевые выбросы',
+            'Регенеративное торможение',
+            'Умное приложение'
+        ]
+    },
+    'megane': {
+        title: 'Renault Megane E-Tech',
+        price: 'от 3 500 000 ₽',
+        image: 'images/megane e.jpg',
+        description: 'Современный электрокроссовер с технологиями нового поколения. Инновации и премиальный комфорт.',
+        techSpecs: [
+            { name: 'Двигатель', value: 'Электромотор, 220 л.с.' },
+            { name: 'Запас хода', value: '470 км' },
+            { name: 'Батарея', value: '60 кВт·ч' },
+            { name: 'Разгон 0-100 км/ч', value: '7.4 сек' },
+            { name: 'Быстрая зарядка', value: '130 кВт' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: '2-зонный' },
+            { name: 'Мультимедиа', value: 'OpenR Link 12"' },
+            { name: 'Цифровая панель', value: '12,3"' },
+            { name: 'Круиз-контроль', value: 'Адаптивный' },
+            { name: 'Панорамная крыша', value: 'Есть' },
+            { name: 'Массаж сидений', value: 'Опция' }
+        ],
+        features: [
+            'Большой запас хода',
+            'Мощный электромотор',
+            'Цифровая панель 12,3"',
+            'Мультимедиа OpenR Link',
+            'Панорамная крыша',
+            'Премиальная отделка'
+        ]
+    },
+    'captur': {
+        title: 'Renault Captur E-Tech',
+        price: 'от 1 900 000 ₽',
+        image: 'images/captur e.jpg',
+        description: 'Гибридный кроссовер с экономичным расходом и отличной динамикой. Эффективность и стиль.',
+        techSpecs: [
+            { name: 'Двигатель', value: 'Гибрид, 140 л.с.' },
+            { name: 'Коробка передач', value: 'Автоматическая' },
+            { name: 'Расход топлива', value: '4.5 л/100км' },
+            { name: 'Электро-привод', value: 'На малых скоростях' },
+            { name: 'Объем багажника', value: '536 л' },
+            { name: 'Количество мест', value: '5' }
+        ],
+        equipment: [
+            { name: 'Климат-контроль', value: '2-зонный' },
+            { name: 'Мультимедиа', value: 'EASY LINK' },
+            { name: 'Режимы вождения', value: '4 режима' },
+            { name: 'Регенеративное торможение', value: 'Есть' },
+            { name: 'Круиз-контроль', value: 'Есть' },
+            { name: 'Подогрев сидений', value: 'Передние' }
+        ],
+        features: [
+            'Гибридная система',
+            'Низкий расход топлива',
+            'Электро-привод в городе',
+            'Регенеративное торможение',
+            'Несколько режимов вождения',
+            'Экологичность'
+        ]
+    }
+};
+
+
+        // Получаем элементы модального окна
+        const modal = document.getElementById('carModal');
+        const closeBtn = document.querySelector('.close');
+
+        // Функция показа деталей автомобиля
+        function showCarDetails(carId) {
+            const car = carData[carId];
+            if (!car) return;
+
+            // Заполняем модальное окно данными
+            document.getElementById('modalCarTitle').textContent = car.title;
+            document.getElementById('modalPrice').textContent = car.price;
+            document.getElementById('modalImage').src = car.image;
+            document.getElementById('modalImage').alt = car.title;
+            document.getElementById('modalDescription').textContent = car.description;
+
+            // Заполняем технические характеристики
+            const techSpecsList = document.getElementById('techSpecs');
+            techSpecsList.innerHTML = '';
+            car.techSpecs.forEach(spec => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="spec-name">${spec.name}</span><span class="spec-value">${spec.value}</span>`;
+                techSpecsList.appendChild(li);
+            });
+
+            // Заполняем комплектацию
+            const equipmentList = document.getElementById('equipmentSpecs');
+            equipmentList.innerHTML = '';
+            car.equipment.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="spec-name">${item.name}</span><span class="spec-value">${item.value}</span>`;
+                equipmentList.appendChild(li);
+            });
+
+            // Заполняем особенности
+            const featuresGrid = document.getElementById('featuresGrid');
+            featuresGrid.innerHTML = '';
+            car.features.forEach(feature => {
+                const div = document.createElement('div');
+                div.className = 'feature-item';
+                div.textContent = feature;
+                featuresGrid.appendChild(div);
+            });
+
+            // Показываем модальное окно
+            modal.style.display = 'block';
+        }
+
+        // Закрываем модальное окно
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+package database
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"renault-backend/models"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
+var DB *sql.DB
+
+// InitDB инициализирует SQLite базу данных
+func InitDB() error {
+	// Создаем директорию для базы данных, если её нет
+	dataDir := "data"
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		return fmt.Errorf("error creating data directory: %v", err)
+	}
+
+	// Открываем базу данных
+	dbPath := filepath.Join(dataDir, "renault.db")
+	var err error
+	DB, err = sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("error opening database: %v", err)
+	}
+
+	// Проверяем подключение
+	err = DB.Ping()
+	if err != nil {
+		return fmt.Errorf("error connecting to database: %v", err)
+	}
+
+	log.Printf("Successfully connected to SQLite database: %s", dbPath)
+
+	// Создаем таблицу пользователей
+	err = createUsersTable()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createUsersTable() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT UNIQUE NOT NULL,
+		email TEXT UNIQUE NOT NULL,
+		password TEXT NOT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	)
+	`
+
+	_, err := DB.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creating users table: %v", err)
+	}
+
+	log.Println("Users table created or already exists")
+	return nil
+}
+
+// UserRepository для работы с пользователями
+type UserRepository struct {
+	db *sql.DB
+}
+
+func NewUserRepository() *UserRepository {
+	return &UserRepository{db: DB}
+}
+
+func (r *UserRepository) CreateUser(username, email, password string) error {
+	query := `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`
+	_, err := r.db.Exec(query, username, email, password)
+	return err
+}
+
+func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
+	query := `SELECT id, username, email, password, created_at FROM users WHERE username = ?`
+	row := r.db.QueryRow(query, username)
+
+	var user models.User
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
+	query := `SELECT id, username, email, password, created_at FROM users WHERE email = ?`
+	row := r.db.QueryRow(query, email)
+
+	var user models.User
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// GetAllUsers возвращает всех пользователей (для отладки)
+func (r *UserRepository) GetAllUsers() ([]models.User, error) {
+	query := `SELECT id, username, email, created_at FROM users ORDER BY created_at DESC`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+// DeleteUser удаляет пользователя (для отладки)
+func (r *UserRepository) DeleteUser(username string) error {
+	query := `DELETE FROM users WHERE username = ?`
+	_, err := r.db.Exec(query, username)
+	return err
+}

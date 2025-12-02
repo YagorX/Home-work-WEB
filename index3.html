@@ -1,0 +1,231 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Название сайта</title>
+    <!-- Подключаем CSS файл -->
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="modal-title">Регистрация</h2>
+            <form class="modal-form">
+                <input type="text" class="modal-input" placeholder="Логин" required>
+                <input type="email" class="modal-input" placeholder="Email" required>
+                <input type="password" class="modal-input" placeholder="Пароль" required>
+                <input type="password" class="modal-input" placeholder="Повторите пароль" required>
+                <button type="submit" class="modal-submit">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+
+	<header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="images/renault_logo.png" alt="Логотип Renault">
+            </div>
+            <div class="title">
+                <h1>Отзыв </h1>
+            </div>
+            <div class="login-section">
+                <div class="login-form">
+                    <div class="form-row">
+                        <input type="text" placeholder="логин" class="login-input">
+                    </div>
+                    <div class="form-row">
+                        <input type="password" placeholder="пароль" class="password-input">
+                    </div>
+                    <div class="form-row">
+                        <input type="submit" value="войти" class="submit-btn">
+                        &nbsp;<a href="#" class="register-link" id="registerLink">регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+<div class="flex-container">
+    <div class="flex-item button-click">
+        <a href="index5.html#light-cars" style="color: white; text-decoration: none;">Легковые</a>
+    </div>
+    <div class="flex-item button-click">
+        <a href="index5.html#crossovers" style="color: white; text-decoration: none;">Кроссоверы</a>
+    </div>
+    <div class="flex-item button-click">
+        <a href="index5.html#commercial" style="color: white; text-decoration: none;">Коммерческие</a>
+    </div>
+    <div class="flex-item button-click">
+        <a href="index5.html#electro" style="color: white; text-decoration: none;">Электромобили</a>
+    </div>
+    <div class="input-container">
+        <input type="text" class="search-input" placeholder="поиск">
+        <input type="button" class="search-output" value="искать">
+    </div>
+</div>
+
+
+<div class="flex-container2">
+	<div class="side-containers-left"> 
+		<a href="index.html" class="button-redirection">Главная</a><BR>
+        <a href="index5.html" class="button-redirection">Каталог</a><BR>
+		<a href="index2.html" class="button-redirection">Оставить отзыв</a><BR>
+		<a href="index3.html" class="button-redirection">Местоположение</a><BR>
+		<a href="index4.html" class="button-redirection">О нас</a><BR>
+	</div>
+
+
+
+	<div class="center-containers">
+    <div class="location-container">
+        <h2>Наш магазин Renault</h2>
+        
+        <div class="location-info">
+            <div class="contact-details">
+                <h3>Контактная информация</h3>
+                <div class="contact-item">
+                    <strong>📍 Адрес:</strong>
+                    <p>г. Москва, Ленинградский проспект, д. 64</p>
+                </div>
+                <div class="contact-item">
+                    <strong>📞 Телефон:</strong>
+                    <p>+7 (495) 123-45-67</p>
+                </div>
+                <div class="contact-item">
+                    <strong>🕒 Часы работы:</strong>
+                    <p>Пн-Пт: 9:00 - 21:00<br>Сб-Вс: 10:00 - 20:00</p>
+                </div>
+                <div class="contact-item">
+                    <strong>✉️ Email:</strong>
+                    <p>moscow@renault.ru</p>
+                </div>
+            </div>
+            
+            <div class="map-container">
+                <h3>Мы на карте</h3>
+                <!-- Вставьте ваш код Google Maps здесь -->
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d287245.4557786813!2d37.18763148649673!3d55.774046059999286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46b54a5a87bed58b%3A0x9642e614448eda67!2zQUFBINCc0J7QotCe0KDQoQ!5e0!3m2!1sru!2sru!4v1760010946047!5m2!1sru!2sru" 
+                    width="100%" 
+                    height="300" 
+                    style="border:0; border-radius: 8px;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<div class="side-containers-right">
+		<a href="https://auto.ru/cars/used/sale/mercedes/g_klasse_amg/1129588689-d7f24301/" class="banner">
+        <img src="images/mers.jpg" alt="Баннер 1">
+    	</a>
+		<a href="https://kia-motors-msk.ru/?utm_source=y_kia_motors_msk&utm_medium=cpc&utm_campaign=MK_MSK_KIA_RIO&calltouch_tm=yd_c:701245377_gb:5610402810_ad:17194008319_ph:205610402810_st:search_pt:premium_p:1_s:none_dt:desktop_reg:213_ret:205610402810_apt:none&utm_term=---autotargeting&etext=2202.zT64n3K15UAh8uSOILEpTmx4c3R1Z21ubnl5YXRmemQ.dd343fb69c74d7923130879675d209fee827e980&yclid=7811045531501199359&ybaip=1" class="banner">
+        <img src="images/kia.jpg" alt="Баннер 2">
+    	</a>
+		<a href="https://www.avito.ru/moskva/avtomobili/lamborghini_urus_4.0_at_2025_10_km_7533069922?context=H4sIAAAAAAAA_wFXAKj_YTozOntzOjEyOiJoYXNHZW9GaWx0ZXIiO2I6MTtzOjEzOiJsb2NhbFByaW9yaXR5IjtiOjA7czoxOiJ4IjtzOjE2OiJ5WHBHTkNDV3FYaWNYNzB5Ijt9z9yQlVcAAAA" class="banner">
+        <img src="images/lamba.jpg" alt="Баннер 3">
+    	</a>
+	</div>
+</div>
+
+	<footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>О компании Renault</h3>
+                <ul>
+                    <li><a href="#">История бренда</a></li>
+                    <li><a href="#">Карьера в Renault</a></li>
+                    <li><a href="#">Социальная ответственность</a></li>
+                    <li><a href="#">Пресс-центр</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Покупателям</h3>
+                <ul>
+                    <li><a href="#">Каталог моделей</a></li>
+                    <li><a href="#">Тест-драйв</a></li>
+                    <li><a href="#">Спецпредложения</a></li>
+                    <li><a href="#">Кредит и лизинг</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Владельцам</h3>
+                <ul>
+                    <li><a href="#">Запись на сервис</a></li>
+                    <li><a href="#">Гарантия</a></li>
+                    <li><a href="#">Запчасти и аксессуары</a></li>
+                    <li><a href="#">Инструкции по эксплуатации</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <p>📞 8-800-700-00-00</p>
+                <p>✉️ info@renault.ru</p>
+                <p>🕒 Ежедневно 9:00 - 21:00</p>
+                <div class="social-links">
+                    <a href="#">VK</a> | 
+                    <a href="#">Telegram</a> | 
+                    <a href="#">YouTube</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 Renault Россия. Все права защищены.</p>
+            <p><a href="#">Политика конфиденциальности</a> | <a href="#">Пользовательское соглашение</a></p>
+        </div>
+    </footer>
+
+    
+    <script>
+        // Получаем элементы модального окна
+        const modal = document.getElementById('registerModal');
+        const registerLink = document.getElementById('registerLink');
+        const closeBtn = document.querySelector('.close');
+
+        // Открываем модальное окно при клике на "регистрация"
+        registerLink.addEventListener('click', function() {
+            modal.style.display = 'block';
+        });
+
+        // Закрываем модальное окно при клике на крестик
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        // Закрываем модальное окно при клике вне его
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Закрываем модальное окно при нажатии Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Обработка формы регистрации
+        const registerForm = document.querySelector('.modal-form');
+        registerForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            // Здесь можно добавить логику обработки регистрации
+            alert('Регистрация успешно завершена!');
+            modal.style.display = 'none';
+            registerForm.reset();
+        });
+    </script>
+
+
+</body>
+</html>

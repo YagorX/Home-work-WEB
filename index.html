@@ -1,0 +1,314 @@
+
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Название сайта</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+
+    <div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="modal-title">Регистрация</h2>
+        
+        <div class="password-rules">
+            <h4>🔒 Требования к паролю:</h4>
+            <ul>
+                <li>Минимум 8 символов</li>
+                <li>Хотя бы одна заглавная буква</li>
+                <li>Хотя бы одна строчная буква</li>
+                <li>Хотя бы одна цифра</li>
+                <li>Хотя бы один специальный символ (!@#$%^&*)</li>
+                <li>Не использовать простые пароли</li>
+                <li>Не использовать последовательности (abc, 123)</li>
+                <li>Не использовать повторяющиеся символы</li>
+            </ul>
+        </div>
+        
+        <form class="modal-form" id="registerForm">
+            <div class="form-group">
+                <input type="text" class="modal-input" id="regUsername" placeholder="Логин" required>
+                <small class="form-hint" style="display: none; color: #666; font-size: 12px; margin-top: 5px;">
+                    Минимум 3 символа, только буквы, цифры и . _ -
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <input type="email" class="modal-input" id="regEmail" placeholder="Email" required>
+                <small class="form-hint" style="display: none; color: #666; font-size: 12px; margin-top: 5px;">
+                    Введите действующий email адрес
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" class="modal-input" id="regPassword" placeholder="Пароль" required>
+                <div id="passwordStrength"></div>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" class="modal-input" id="regConfirmPassword" placeholder="Повторите пароль" required>
+                <div id="passwordMatch" style="display: none; margin-top: 5px; font-size: 12px;"></div>
+            </div>
+            
+            <div id="passwordErrors"></div>
+            
+            <button type="submit" class="modal-submit" id="submitBtn">
+                Зарегистрироваться
+            </button>
+            
+            <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                Уже есть аккаунт? <a href="#" id="switchToLogin" style="color: #3498db; text-decoration: none;">Войти</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для входа -->
+<div id="loginModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close close-login">&times;</span>
+        <h2 class="modal-title">Вход в аккаунт</h2>
+        
+        <form class="modal-form" id="loginModalForm">
+            <div class="form-group">
+                <input type="text" class="modal-input" id="loginUsername" placeholder="Логин" required>
+            </div>
+            
+            <div class="form-group">
+                <input type="password" class="modal-input" id="loginPassword" placeholder="Пароль" required>
+                <div style="text-align: right; margin-top: 5px;">
+                    <a href="#" id="forgotPassword" style="color: #3498db; font-size: 12px; text-decoration: none;">
+                        Забыли пароль?
+                    </a>
+                </div>
+            </div>
+            
+            <button type="submit" class="modal-submit">
+                Войти
+            </button>
+            
+            <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                Нет аккаунта? <a href="#" id="switchToRegister" style="color: #3498db; text-decoration: none;">Зарегистрироваться</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+	<header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="images/renault_logo.png" alt="Логотип Renault">
+            </div>
+            <div class="title">
+                <h1>Renault - лучшая машина </h1>
+            </div>
+            <div class="login-section">
+                <div class="login-form">
+                    <div class="form-row">
+                        <input type="text" placeholder="логин" class="login-input">
+                    </div>
+                    <div class="form-row">
+                        <input type="password" placeholder="пароль" class="password-input">
+                    </div>
+                    <div class="form-row">
+                        <input type="submit" value="войти" class="submit-btn">
+                        &nbsp;<a href="#" class="register-link" id="registerLink">регистрация</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+<div class="flex-container">
+    <div class="flex-item button-click">
+        <a href="index5.html#light-cars" style="color: white; text-decoration: none;">Легковые</a>
+    </div>
+    <div class="flex-item button-click">
+        <a href="index5.html#crossovers" style="color: white; text-decoration: none;">Кроссоверы</a>
+    </div>
+    <div class="flex-item button-click">
+        <a href="index5.html#commercial" style="color: white; text-decoration: none;">Коммерческие</a>
+    </div>
+    <div class="flex-item button-click">
+        <a href="index5.html#electro" style="color: white; text-decoration: none;">Электромобили</a>
+    </div>
+    <div class="input-container">
+        <input type="text" class="search-input" placeholder="поиск">
+        <input type="button" class="search-output" value="искать">
+    </div>
+</div>
+
+<div class="flex-container2">
+	<div class="side-containers-left"> 
+		<a href="index.html" class="button-redirection">Главная</a><BR>
+        <a href="index5.html" class="button-redirection">Каталог</a><BR>
+		<a href="index2.html" class="button-redirection">Оставить отзыв</a><BR>
+		<a href="index3.html" class="button-redirection">Местоположение</a><BR>
+		<a href="index4.html" class="button-redirection">О нас</a><BR>
+	</div>
+
+	<div class="center-containers">
+    <h2>Renault - Французское качество и инновации</h2>
+
+    <img src="images/renault_logo.jpg" alt="Логотип Renault" style="width: 200px; float: left; margin: 0 15px 15px 0; float: left;">
+    <p>Компания <b>Renault</b> была основана в 1899 году братьями Луи, Марселем и Фернаном Рено. За более чем 120-летнюю историю бренд стал одним из самых узнаваемых автомобильных производителей в Европе и мире.</p>
+    
+    <p>Сегодня Renault входит в альянс Renault-Nissan-Mitsubishi, что позволяет компании делиться технологиями и ресурсами для создания еще более совершенных автомобилей.</p>
+    
+    <p><i>«Наша миссия - сделать передовые технологии доступными для каждого»</i> - говорит генеральный директор компании Лука де Мео. Именно этот принцип лежит в основе философии бренда.</p>
+    
+    <p>Современные модели Renault сочетают в себе <b>энергоэффективность</b>, <b>безопасность</b> и <b>инновационный дизайн</b>. Особой популярностью пользуются электромобили серии ZOE и Megane E-Tech.</p>
+    
+    <h2>Популярные модели.</h2>
+    
+<table class="renault-table">
+    <tr>
+        <td class="side-header" rowspan="3">
+            Концерн Renault<br>
+            <small>Французский автопроизводитель</small>
+        </td>
+        <td class="main-header" colspan="2">
+            Основные модели Renault
+        </td>
+    </tr>
+    <tr>
+        <td class="model-cell">
+            <b>Renault Duster</b><br>
+            <small>Внедорожник<br>с 2010 года</small>
+        </td>
+        <td class="model-cell">
+            <b>Renault Arkana</b><br>
+            <small>Кросс-купе<br>с 2019 года</small>
+        </td>
+    </tr>
+    <tr>
+        <td class="model-cell">
+            <b>Renault Logan</b><br>
+            <small>Бюджетный седан<br>глобальная платформа</small>
+        </td>
+        <td class="model-cell">
+            <b>Renault Koleos</b><br>
+            <small>Флагманский<br>кроссовер</small>
+        </td>
+    </tr>
+</table>
+    
+    <h2>Преимущества Renault</h2>
+    
+    <ul>
+        <li>Надежность и долговечность</li>
+        <li>Доступная стоимость обслуживания</li>
+        <li>Широкая сервисная сеть</li>
+        <li>Инновационные технологии</li>
+    </ul>
+    
+    <h2>Рейтинг популярности моделей</h2>
+    
+    <ol type="a">
+        <li>Renault Duster</li>
+        <li>Renault Logan</li>
+        <li>Renault Sandero</li>
+        <li>Renault Arkana</li>
+    </ol>
+    
+    <h2>Комплектации Renault</h2>
+    
+    <ol type="A">
+        <li>Базовая комплектация
+            <ol type="a" style="margin-left: 40px;">
+                <li>Кондиционер</li>
+                <li>Электростеклоподъемники</li>
+                <li>Аудиосистема</li>
+            </ol>
+        </li>
+        <li>Средняя комплектация
+            <ol type="a" style="margin-left: 40px;">
+                <li>Климат-контроль</li>
+                <li>Круиз-контроль</li>
+                <li>Мультимедийная система</li>
+            </ol>
+        </li>
+        <li>Топовая комплектация
+            <ol type="a" style="margin-left: 40px;">
+                <li>Кожаный салон</li>
+                <li>Панорамная крыша</li>
+                <li>Система помощи при парковке</li>
+            </ol>
+        </li>
+    </ol>
+    
+    <p>Компания продолжает развивать направление электромобильности и планирует к 2025 году представить <b>10 новых электромоделей</b>. Это свидетельствует о приверженности бренда экологичным технологиям и устойчивому развитию.</p>
+    
+    <p><i>«Будущее автомобильной промышленности - за чистой энергией и умными технологиями, и Renault готов возглавить эту трансформацию»</i> - отмечают в пресс-службе компании.</p>
+</div>
+
+	<div class="side-containers-right">
+		<a href="https://auto.ru/cars/used/sale/mercedes/g_klasse_amg/1129588689-d7f24301/" class="banner">
+        <img src="images/mers.jpg" alt="Баннер 1">
+    	</a>
+		<a href="https://kia-motors-msk.ru/?utm_source=y_kia_motors_msk&utm_medium=cpc&utm_campaign=MK_MSK_KIA_RIO&calltouch_tm=yd_c:701245377_gb:5610402810_ad:17194008319_ph:205610402810_st:search_pt:premium_p:1_s:none_dt:desktop_reg:213_ret:205610402810_apt:none&utm_term=---autotargeting&etext=2202.zT64n3K15UAh8uSOILEpTmx4c3R1Z21ubnl5YXRmemQ.dd343fb69c74d7923130879675d209fee827e980&yclid=7811045531501199359&ybaip=1" class="banner">
+        <img src="images/kia.jpg" alt="Баннер 2">
+    	</a>
+		<a href="https://www.avito.ru/moskva/avtomobili/lamborghini_urus_4.0_at_2025_10_km_7533069922?context=H4sIAAAAAAAA_wFXAKj_YTozOntzOjEyOiJoYXNHZW9GaWx0ZXIiO2I6MTtzOjEzOiJsb2NhbFByaW9yaXR5IjtiOjA7czoxOiJ4IjtzOjE2OiJ5WHBHTkNDV3FYaWNYNzB5Ijt9z9yQlVcAAAA" class="banner">
+        <img src="images/lamba.jpg" alt="Баннер 3">
+    	</a>
+	</div>
+</div>
+
+	<footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>О компании Renault</h3>
+                <ul>
+                    <li><a href="#">История бренда</a></li>
+                    <li><a href="#">Карьера в Renault</a></li>
+                    <li><a href="#">Социальная ответственность</a></li>
+                    <li><a href="#">Пресс-центр</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Покупателям</h3>
+                <ul>
+                    <li><a href="#">Каталог моделей</a></li>
+                    <li><a href="#">Тест-драйв</a></li>
+                    <li><a href="#">Спецпредложения</a></li>
+                    <li><a href="#">Кредит и лизинг</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Владельцам</h3>
+                <ul>
+                    <li><a href="#">Запись на сервис</a></li>
+                    <li><a href="#">Гарантия</a></li>
+                    <li><a href="#">Запчасти и аксессуары</a></li>
+                    <li><a href="#">Инструкции по эксплуатации</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <p>📞 8-800-700-00-00</p>
+                <p>✉️ info@renault.ru</p>
+                <p>🕒 Ежедневно 9:00 - 21:00</p>
+                <div class="social-links">
+                    <a href="#">VK</a> | 
+                    <a href="#">Telegram</a> | 
+                    <a href="#">YouTube</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 Renault Россия. Все права защищены.</p>
+            <p><a href="#">Политика конфиденциальности</a> | <a href="#">Пользовательское соглашение</a></p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
