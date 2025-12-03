@@ -1,12 +1,17 @@
+// backend/main.go
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
+
 	"renault-backend/database"
 	"renault-backend/handlers"
 
 	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/cors"
 )
 
@@ -15,43 +20,86 @@ const (
 	PORT       = "8080"
 )
 
+// ----- Модели каталога -----
+
+type Car struct {
+	ID          string   `json:"id"`
+	Title       string   `json:"title"`
+	Model       string   `json:"model"` // дублируем title, чтобы фронт не ломался
+	Description string   `json:"description"`
+	Category    string   `json:"category"`
+	Image       string   `json:"image"`  // главное изображение (превью)
+	Images      []string `json:"images"` // все изображения для галереи
+	Price       int      `json:"price"`
+	Features    []string `json:"features"`
+	TechSpecs   []Spec   `json:"techSpecs"`
+	Equipment   []Spec   `json:"equipment"`
+}
+
+type Spec struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+// отдельная БД под каталог автомобилей
+var carDB *sql.DB
+
 func main() {
-	// Инициализация базы данных SQLite
-	err := database.InitDB()
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+	// ---------- БД пользователей / auth (твоя старая логика) ----------
+	if err := database.InitDB(); err != nil {
+		log.Fatalf("Failed to connect to users DB: %v", err)
 	}
 	defer database.DB.Close()
 
-	// Инициализация репозитория и обработчиков
 	userRepo := database.NewUserRepository()
 	authHandler := handlers.NewAuthHandler(userRepo, JWT_SECRET)
 
-	// Настройка роутера
+	// ---------- БД каталога автомобилей ----------
+	var err error
+	// путь поправь, если бинарник запускается не из корня проекта
+	carDB, err = sql.Open("sqlite3", "cars.db")
+	if err != nil {
+		log.Fatal("Ошибка открытия БД каталога:", err)
+	}
+	defer carDB.Close()
+
+	if err := carDB.Ping(); err != nil {
+		log.Fatal("Ошибка подключения к БД каталога:", err)
+	}
+
+	if err := createCarTables(); err != nil {
+		log.Fatal("Ошибка создания таблиц каталога:", err)
+	}
+
+	if err := seedCarData(); err != nil {
+		log.Fatal("Ошибка начального заполнения каталога:", err)
+	}
+
+	// ---------- Роутер ----------
 	router := mux.NewRouter()
 
-	carHandler := handlers.NewCarHandler()
-
-	// Маршруты API
+	// подроутер /api
 	api := router.PathPrefix("/api").Subrouter()
 
-	// Публичные маршруты
+	// Публичные маршруты (auth и прочее)
 	api.HandleFunc("/health", handlers.HealthCheck).Methods("GET")
 	api.HandleFunc("/register", authHandler.Register).Methods("POST")
 	api.HandleFunc("/login", authHandler.Login).Methods("POST")
 	api.HandleFunc("/validate-password", authHandler.ValidatePassword).Methods("POST")
 	api.HandleFunc("/password-rules", authHandler.PasswordRules).Methods("GET")
 
-	// Отладочные маршруты (в продакшене убрать или защитить)
+	// Отладочные маршруты (как было)
 	api.HandleFunc("/users", authHandler.GetAllUsers).Methods("GET")
 
-	api.HandleFunc("/cars", carHandler.GetAllCars).Methods("GET")
-	api.HandleFunc("/cars/{model}", carHandler.GetCarByModel).Methods("GET")
-	api.HandleFunc("/cars/category/{category}", carHandler.GetCarsByCategory).Methods("GET")
+	// Каталог автомобилей — новые хендлеры на carDB
+	api.HandleFunc("/cars", getAllCarsHandler).Methods("GET")
+	api.HandleFunc("/cars/{id}", getCarByIDHandler).Methods("GET")
+	// если нужно будет фильтровать по категории:
+	// api.HandleFunc("/cars/category/{category}", getCarsByCategoryHandler).Methods("GET")
 
-	// Настройка CORS
+	// ---------- CORS ----------
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // В продакшене заменить на конкретные домены
+		AllowedOrigins:   []string{"*"}, // в проде лучше ограничить
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Requested-With"},
 		ExposedHeaders:   []string{"Content-Length"},
@@ -59,7 +107,6 @@ func main() {
 		MaxAge:           86400,
 	})
 
-	// Запуск сервера
 	addr := ":" + PORT
 	log.Printf("🚗 Renault Backend Server starting on http://localhost%s", addr)
 	log.Printf("📡 API endpoints:")
@@ -81,4 +128,371 @@ func main() {
 	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// ---------- Работа с БД каталога ----------
+
+func createCarTables() error {
+	_, err := carDB.Exec(`
+        CREATE TABLE IF NOT EXISTS cars (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            description TEXT,
+            category TEXT,
+            image TEXT,
+            base_price INTEGER
+        );
+
+        CREATE TABLE IF NOT EXISTS car_features (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            car_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS car_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            car_id TEXT NOT NULL,
+            image_path TEXT NOT NULL,
+            FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+        );
+    `)
+	return err
+}
+
+func seedCarData() error {
+	var count int
+	if err := carDB.QueryRow("SELECT COUNT(*) FROM cars").Scan(&count); err != nil {
+		return err
+	}
+	if count > 0 {
+		// уже есть данные — ничего не делаем
+		return nil
+	}
+
+	tx, err := carDB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// ----- cars -----
+	carsInsert := `
+		INSERT INTO cars (id, title, description, category, image, base_price)
+		VALUES (?, ?, ?, ?, ?, ?);
+	`
+	cars := []struct {
+		ID, Title, Desc, Category, Image string
+		Price                            int
+	}{
+		{"logan", "Renault Logan", "Надежный седан для города и трассы. Идеальное сочетание цены и качества.",
+			"Легковые", "images/renault_logan.jpeg", 950000},
+		{"sandero", "Renault Sandero", "Компактный хэтчбек с просторным салоном и экономичным двигателем.",
+			"Легковые", "images/renault_sander.jpg", 890000},
+		{"stepway", "Renault Sandero Stepway", "Хэтчбек в кросс-кузове с увеличенным клиренсом и стильным дизайном.",
+			"Легковые", "images/renault_sander_stepway.jpeg", 1100000},
+
+		{"duster", "Renault Duster", "Легендарный внедорожник с полным приводом. Покоритель любых дорог.",
+			"Кроссоверы", "images/duster.jpeg", 1450000},
+		{"kaptur", "Renault Kaptur", "Стильный компактный кроссовер с передовыми технологиями безопасности.",
+			"Кроссоверы", "images/kapture.jpeg", 1350000},
+		{"arkana", "Renault Arkana", "Элегантное кросс-купе с динамичным характером и просторным салоном.",
+			"Кроссоверы", "images/arkana.jpeg", 1650000},
+
+		{"loganvan", "Renault Logan Van", "Коммерческая версия Logan с увеличенным багажным отделением.",
+			"Коммерческие", "images/van.jpeg", 1000000},
+		{"kangoo", "Renault Kangoo", "Компактный коммерческий автомобиль с отличной маневренностью.",
+			"Коммерческие", "images/kangoo.jpeg", 1300000},
+		{"trafic", "Renault Trafic", "Универсальный коммерческий автомобиль для перевозки грузов.",
+			"Коммерческие", "images/trafic.jpg", 1800000},
+
+		{"zoe", "Renault ZOE", "Компактный электромобиль для города с впечатляющим запасом хода.",
+			"Электромобили", "images/zoe.jpeg", 2200000},
+		{"megane", "Renault Megane E-Tech", "Современный электрокроссовер с технологиями нового поколения.",
+			"Электромобили", "images/megane e.jpg", 3500000},
+		{"captur", "Renault Captur E-Tech", "Гибридный кроссовер с экономичным расходом и отличной динамикой.",
+			"Гибриды", "images/captur e.jpg", 1900000},
+	}
+
+	for _, c := range cars {
+		if _, err := tx.Exec(carsInsert, c.ID, c.Title, c.Desc, c.Category, c.Image, c.Price); err != nil {
+			return err
+		}
+	}
+
+	// ----- car_features -----
+	featuresInsert := `INSERT INTO car_features (car_id, name) VALUES (?, ?);`
+	features := map[string][]string{
+		"logan": {
+			"Расход: 6.1 л/100км",
+			"Мощность: 82 л.с.",
+			"Объем багажника: 510 л",
+		},
+		"sandero": {
+			"Расход: 5.8 л/100км",
+			"Мощность: 75 л.с.",
+			"5-ступенчатая МКПП",
+		},
+		"stepway": {
+			"Клиренс: 195 мм",
+			"Мощность: 90 л.с.",
+			"Защита бампера",
+		},
+		"duster": {
+			"Полный привод 4x4",
+			"Мощность: 114 л.с.",
+			"Клиренс: 210 мм",
+		},
+		"kaptur": {
+			"Система ESP",
+			"Мощность: 113 л.с.",
+			"Мультимедиа R-Link",
+		},
+		"arkana": {
+			"Купе-форма",
+			"Мощность: 150 л.с.",
+			"Вариатор X-Tronic",
+		},
+		"loganvan": {
+			"Объем багажника: 800 л",
+			"Грузоподъемность: 500 кг",
+			"Низкий расход топлива",
+		},
+		"kangoo": {
+			"Объем: 3-4.6 м³",
+			"Грузоподъемность: 650 кг",
+			"Сдвижные двери",
+		},
+		"trafic": {
+			"Объем: 5.2-8.6 м³",
+			"Грузоподъемность: 1-1.5 т",
+			"Дизельный двигатель",
+		},
+		"zoe": {
+			"Запас хода: 395 км",
+			"Мощность: 135 л.с.",
+			"Быстрая зарядка за 30 мин",
+		},
+		"megane": {
+			"Запас хода: 470 км",
+			"Мощность: 220 л.с.",
+			"Цифровая панель 12,3\"",
+		},
+		"captur": {
+			"Гибридная система",
+			"Расход: 4.5 л/100км",
+			"Электро-привод на малых скоростях",
+		},
+	}
+
+	imagesInsert := `INSERT INTO car_images (car_id, image_path) VALUES (?, ?);`
+
+	carImages := map[string][]string{
+		"logan": {
+			"images/renault_logan.jpeg",
+			"images/renault_logan_2.jpg",
+			"images/renaul_logan_3.jpg",
+		},
+		"sandero": {
+			"images/renault_sander.jpg",
+			"images/renault_sandero2.jpg",
+		},
+		"stepway": {
+			"images/renault_sander_stepway.jpeg",
+			"images/renault_sandero_stepway2.jpg",
+		},
+	}
+
+	for carID, imgs := range carImages {
+		for _, path := range imgs {
+			if _, err := tx.Exec(imagesInsert, carID, path); err != nil {
+				return err
+			}
+		}
+	}
+
+	for carID, list := range features {
+		for _, f := range list {
+			if _, err := tx.Exec(featuresInsert, carID, f); err != nil {
+				return err
+			}
+		}
+	}
+
+	return tx.Commit()
+}
+
+func getCarImages(carID string) ([]string, error) {
+	rows, err := carDB.Query(`SELECT image_path FROM car_images WHERE car_id = ? ORDER BY id`, carID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var images []string
+	for rows.Next() {
+		var path string
+		if err := rows.Scan(&path); err != nil {
+			return nil, err
+		}
+		images = append(images, path)
+	}
+	return images, nil
+}
+
+// ---------- HTTP-хендлеры каталога ----------
+
+func getAllCarsHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := carDB.Query(`SELECT id, title, description, category, image, base_price FROM cars`)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var cars []Car
+
+	for rows.Next() {
+		var c Car
+		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Category, &c.Image, &c.Price); err != nil {
+			http.Error(w, "scan error", http.StatusInternalServerError)
+			return
+		}
+		c.Model = c.Title
+
+		// подгружаем features
+		featRows, err := carDB.Query(`SELECT name FROM car_features WHERE car_id = ?`, c.ID)
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		for featRows.Next() {
+			var name string
+			if err := featRows.Scan(&name); err != nil {
+				http.Error(w, "scan error", http.StatusInternalServerError)
+				featRows.Close()
+				return
+			}
+			c.Features = append(c.Features, name)
+		}
+		featRows.Close()
+
+		// подгружаем изображения
+		imgs, err := getCarImages(c.ID)
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		// если в таблице нет записей, хотя бы главное изображение
+		if len(imgs) == 0 && c.Image != "" {
+			imgs = []string{c.Image}
+		}
+		c.Images = imgs
+
+		cars = append(cars, c)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(cars)
+}
+
+func getCarByIDHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var c Car
+	err := carDB.QueryRow(
+		`SELECT id, title, description, category, image, base_price FROM cars WHERE id = ?`,
+		id,
+	).Scan(&c.ID, &c.Title, &c.Description, &c.Category, &c.Image, &c.Price)
+	if err == sql.ErrNoRows {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+
+	c.Model = c.Title
+
+	featRows, err := carDB.Query(`SELECT name FROM car_features WHERE car_id = ?`, c.ID)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	for featRows.Next() {
+		var name string
+		if err := featRows.Scan(&name); err != nil {
+			http.Error(w, "scan error", http.StatusInternalServerError)
+			featRows.Close()
+			return
+		}
+		c.Features = append(c.Features, name)
+	}
+	featRows.Close()
+
+	imgs, err := getCarImages(c.ID)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	if len(imgs) == 0 && c.Image != "" {
+		imgs = []string{c.Image}
+	}
+	c.Images = imgs
+
+	c.TechSpecs = []Spec{}
+	c.Equipment = []Spec{}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(c)
+}
+
+// опционально — фильтр по категории, если понадобится
+func getCarsByCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	category := vars["category"]
+
+	rows, err := carDB.Query(
+		`SELECT id, title, description, category, image, base_price FROM cars WHERE category = ?`,
+		category,
+	)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var cars []Car
+
+	for rows.Next() {
+		var c Car
+		if err := rows.Scan(&c.ID, &c.Title, &c.Description, &c.Category, &c.Image, &c.Price); err != nil {
+			http.Error(w, "scan error", http.StatusInternalServerError)
+			return
+		}
+		c.Model = c.Title
+
+		featRows, err := carDB.Query(`SELECT name FROM car_features WHERE car_id = ?`, c.ID)
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		for featRows.Next() {
+			var name string
+			if err := featRows.Scan(&name); err != nil {
+				http.Error(w, "scan error", http.StatusInternalServerError)
+				featRows.Close()
+				return
+			}
+			c.Features = append(c.Features, name)
+		}
+		featRows.Close()
+
+		cars = append(cars, c)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(cars)
 }

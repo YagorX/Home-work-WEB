@@ -881,18 +881,41 @@ if (document.getElementById('forgotPassword')) {
     });
 }
 
-// Функция сохранения данных аутентификации
 function saveAuthData(token, user) {
     if (token) {
         localStorage.setItem('auth_token', token);
         console.log('Token saved to localStorage');
     }
-    if (user && user.username) {
-        localStorage.setItem('username', user.username);
-        localStorage.setItem('user_email', user.email);
-        console.log('User data saved to localStorage:', user.username);
+
+    if (user) {
+        if (user.username) {
+            localStorage.setItem('username', user.username);
+        }
+        if (user.email) {
+            localStorage.setItem('user_email', user.email);
+        }
+
+        // 🟢 САМОЕ ВАЖНОЕ: сохраняем ID пользователя для корзины
+        if (user.id !== undefined && user.id !== null) {
+            localStorage.setItem('user_id', user.id);
+            localStorage.setItem('currentUserId', user.id.toString());
+            console.log('User ID saved to localStorage:', user.id);
+        } else {
+            console.warn('user.id не пришёл с сервера, currentUserId не установлен');
+        }
+
+        console.log('User data saved to localStorage:', user);
     }
 }
+
+// Проверка, авторизован ли пользователь
+function isUserLoggedIn() {
+    const token = localStorage.getItem('auth_token');
+    const username = localStorage.getItem('username');
+    // при желании можно ещё проверять currentUserId / user_id
+    return !!(token && username);
+}
+
 
 // Функция обновления интерфейса после входа
 function updateUIAfterLogin(username) {
@@ -958,19 +981,78 @@ function updateUIAfterLogin(username) {
     }
 }
 
-// Функция выхода
 function logout() {
     showNotification('👋 До свидания! Вы вышли из системы.', 'info');
+
+    // чистим данные авторизации
     localStorage.removeItem('auth_token');
     localStorage.removeItem('username');
     localStorage.removeItem('user_email');
-    console.log('User logged out, localStorage cleared');
+
+    // 🟢 ВАЖНО: отвязываем текущего пользователя от корзины
+    localStorage.removeItem('currentUserId');
+
+    // ⛔ НЕ трогаем cart_* — корзины остаются, чтобы при следующем входе под тем же пользователем они подтянулись
+
+    console.log('User logged out, auth data cleared, currentUserId removed');
     setTimeout(() => {
         location.reload();
     }, 1500);
 }
 
-// Проверяем авторизацию при загрузке страницы
+// Ограничение формы отзыва только для авторизованных пользователей
+function initFeedbackAccess() {
+    const feedbackForm = document.querySelector('.feedback-form');
+    if (!feedbackForm) return; // мы не на странице отзыва
+
+    const warningId = 'feedback-auth-warning';
+
+    function showAuthWarning() {
+        // если уже есть предупреждение — не дублируем
+        if (document.getElementById(warningId)) return;
+
+        const warning = document.createElement('div');
+        warning.id = warningId;
+        warning.style.marginTop = '15px';
+        warning.style.padding = '10px 15px';
+        warning.style.borderRadius = '6px';
+        warning.style.backgroundColor = '#fff3cd';
+        warning.style.border = '1px solid #ffeeba';
+        warning.style.color = '#856404';
+        warning.style.fontSize = '14px';
+
+        warning.innerHTML = `
+            🔒 Оставлять отзывы могут только авторизованные пользователи.<br>
+            Пожалуйста, войдите или зарегистрируйтесь через форму вверху страницы.
+        `;
+
+        feedbackForm.parentNode.insertBefore(warning, feedbackForm);
+    }
+
+    // при загрузке страницы сразу проверим
+    if (!isUserLoggedIn()) {
+        showAuthWarning();
+    }
+
+    // перехватываем отправку формы
+    feedbackForm.addEventListener('submit', function (event) {
+        if (!isUserLoggedIn()) {
+            event.preventDefault();
+            showNotification(
+                'Только авторизованные пользователи могут оставлять отзывы. Войдите или зарегистрируйтесь.',
+                'warning'
+            );
+
+            // чуть прокрутим к шапке, чтобы юзер увидел форму логина
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            // здесь можно позже добавить отправку отзыва на сервер
+            // сейчас просто даём форме работать, как задумано
+        }
+    });
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, checking auth...');
     
@@ -987,12 +1069,16 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('User is not logged in');
     }
     
+    // 🔹 Ограничиваем доступ к форме отзыва
+    initFeedbackAccess();
+
     // Проверка соединения с сервером
     checkServerConnection();
     
     // Загружаем правила паролей
     loadPasswordRules();
 });
+
 
 // Добавляем стили для отображения правил пароля
 const passwordRulesStyles = document.createElement('style');

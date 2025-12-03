@@ -193,6 +193,356 @@
             animation: fadeIn 0.5s ease;
         }
 
+        /* Стили для кнопки добавления в корзину */
+        .cart-btn {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .cart-btn.added {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+        }
+
+        .cart-btn.added:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cart-btn .cart-icon {
+            font-size: 16px;
+        }
+
+        /* Стили для иконки корзины в шапке */
+        .cart-header {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cart-icon-header {
+            position: relative;
+            cursor: pointer;
+            font-size: 24px;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .cart-icon-header:hover {
+            color: #0078D7;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff0000;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Стили для модального окна корзины */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .cart-modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .cart-close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .cart-close:hover {
+            color: #333;
+        }
+
+        .cart-title {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .cart-items {
+            margin-bottom: 30px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            transition: transform 0.3s ease;
+        }
+
+        .cart-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .cart-item-image {
+            width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .remove-item {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .remove-item:hover {
+            background: #c82333;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .cart-empty h3 {
+            margin-bottom: 10px;
+        }
+
+        .cart-total {
+            text-align: right;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .total-label {
+            font-size: 18px;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        .total-price {
+            font-size: 24px;
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .cart-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .clear-cart-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+            flex: 1;
+        }
+
+        .clear-cart-btn:hover {
+            background: #545b62;
+        }
+
+        .checkout-btn {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+            flex: 2;
+        }
+
+        .checkout-btn:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+        }
+
+        /* Уведомление о добавлении в корзину */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .search-container {
+                padding: 0 15px;
+            }
+
+            .input-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-input, .search-output {
+                width: 100%;
+                text-align: center;
+            }
+
+            .category-filter {
+                gap: 8px;
+            }
+
+            .category-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .search-info {
+                font-size: 13px;
+            }
+
+            .cart-header {
+                top: 15px;
+                right: 15px;
+            }
+
+            .cart-modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .cart-item-image {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .cart-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-container {
+                margin: 15px auto;
+            }
+
+            .category-filter {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .category-btn {
+                flex-shrink: 0;
+            }
+
+            .home-button-container {
+                margin-top: 50px;
+            }
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -203,81 +553,124 @@
                 transform: translateY(0);
             }
         }
-
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .search-container {
-                padding: 0 15px;
-            }
-            
-            .input-container {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .search-input, .search-output {
-                width: 100%;
-                text-align: center;
-            }
-            
-            .category-filter {
-                gap: 8px;
-            }
-            
-            .category-btn {
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-            
-            .search-info {
-                font-size: 13px;
-            }
+        .gallery-modal {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
         }
 
-        @media (max-width: 480px) {
-            .search-container {
-                margin: 15px auto;
+        .gallery-content {
+            position: relative;
+            margin: 3% auto;
+            max-width: 900px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .gallery-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .gallery-close {
+            position: absolute;
+            top: -10px;
+            right: 0;
+            font-size: 32px;
+            color: #fff;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .gallery-close:hover {
+            color: #ff0000;
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            border: none;
+            color: #fff;
+            font-size: 30px;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .gallery-nav.prev {
+            left: 10px;
+        }
+
+        .gallery-nav.next {
+            right: 10px;
+        }
+
+        .gallery-nav:hover {
+            background: rgba(0,0,0,0.8);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .gallery-counter {
+            margin-top: 10px;
+            color: #fff;
+            font-size: 14px;
+            text-shadow: 0 0 5px rgba(0,0,0,0.7);
+        }
+
+        @media (max-width: 768px) {
+            .gallery-content {
+                width: 95%;
             }
-            
-            .category-filter {
-                justify-content: flex-start;
-                overflow-x: auto;
-                padding-bottom: 10px;
-            }
-            
-            .category-btn {
-                flex-shrink: 0;
+            .gallery-nav {
+                font-size: 24px;
+                padding: 8px 12px;
             }
         }
     </style>
 </head>
 <body>
+
     <!-- Контейнер с размытым фоном и кнопкой -->
     <div class="home-button-container">
         <a href="index.html" class="home-button">На главную</a>
 
         <div class="search-container">
-        <div class="input-container">
-            <input 
-                type="text" 
-                class="search-input" 
-                id="searchInput" 
-                placeholder="Поиск по каталогу: модель, описание, характеристики..."
-                autocomplete="off"
-            >
-            <input 
-                type="button" 
-                class="search-output" 
-                id="searchButton" 
-                value="Искать"
-            >
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="Поиск по каталогу: модель, описание, характеристики..."
+                    autocomplete="off"
+                >
+                <input 
+                    type="button" 
+                    class="search-output" 
+                    id="searchButton" 
+                    value="Искать"
+                >
+            </div>
+        </div>
+
+        <!-- Иконка корзины -->
+        <div class="cart-header">
+            <div class="cart-icon-header" id="cartIcon">
+                🛒
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
         </div>
     </div>
-    </div>
 
-    <!-- Поисковая строка -->
-    
-    
     <!-- Информация о поиске -->
     <div class="search-info">
         <div class="search-stats">
@@ -302,7 +695,40 @@
         <button class="try-again-btn" id="tryAgainBtn">Сбросить фильтры</button>
     </div>
 
-    <!-- Модальное окно для деталей -->
+    <!-- Модальное окно корзины -->
+    <div id="cartModal" class="cart-modal">
+        <div class="cart-modal-content">
+            <span class="cart-close">&times;</span>
+            <h2 class="cart-title">🛒 Ваша корзина</h2>
+
+            <div class="cart-items" id="cartItems">
+                <!-- Товары будут добавляться сюда -->
+            </div>
+
+            <div class="cart-empty" id="cartEmpty">
+                <h3>Корзина пуста</h3>
+                <p>Добавьте автомобили из каталога</p>
+            </div>
+
+            <div class="cart-total" id="cartTotal">
+                <span class="total-label">Итого:</span>
+                <span class="total-price" id="totalPrice">0 ₽</span>
+            </div>
+
+            <div class="cart-actions">
+                <button class="clear-cart-btn" id="clearCartBtn">Очистить корзину</button>
+                <button class="checkout-btn" id="checkoutBtn">Оформить заявку</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div class="notification" id="notification">
+        Автомобиль добавлен в корзину!
+    </div>
+
+    <!-- Модальное окно для деталей автомобиля -->
+        <!-- Модальное окно для деталей автомобиля -->
     <div id="carModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -321,24 +747,18 @@
             <div class="modal-specs">
                 <div class="spec-group">
                     <h3>Технические характеристики</h3>
-                    <ul class="spec-list" id="techSpecs">
-                        <!-- Заполняется JavaScript -->
-                    </ul>
+                    <ul class="spec-list" id="techSpecs"></ul>
                 </div>
                 
                 <div class="spec-group">
                     <h3>Комплектация</h3>
-                    <ul class="spec-list" id="equipmentSpecs">
-                        <!-- Заполняется JavaScript -->
-                    </ul>
+                    <ul class="spec-list" id="equipmentSpecs"></ul>
                 </div>
             </div>
             
             <div class="modal-features">
                 <h3>Ключевые особенности</h3>
-                <div class="features-grid" id="featuresGrid">
-                    <!-- Заполняется JavaScript -->
-                </div>
+                <div class="features-grid" id="featuresGrid"></div>
             </div>
             
             <div class="modal-actions">
@@ -348,6 +768,19 @@
         </div>
     </div>
 
+    <!-- Модальное окно галереи изображений -->
+    <div id="imageGalleryModal" class="gallery-modal">
+        <div class="gallery-content">
+            <span class="gallery-close">&times;</span>
+            <button class="gallery-nav prev">&#10094;</button>
+            <img id="galleryImage" class="gallery-image" src="" alt="Фото автомобиля">
+            <button class="gallery-nav next">&#10095;</button>
+            <div id="galleryCounter" class="gallery-counter">1 / 1</div>
+        </div>
+    </div>
+
+    </div>
+
     <div class="catalog-container">
         <h1 class="catalog-title">Каталог Renault</h1>
 
@@ -355,70 +788,7 @@
         <div class="section" id="light-cars">
             <h2 class="section-title">Легковые автомобили</h2>
             <div class="cards-grid">
-                
-                <div class="card" data-search-index='{
-                    "title": "Renault Logan",
-                    "description": "Надежный седан для города и трассы. Идеальное сочетание цены и качества.",
-                    "features": ["Расход: 6.1 л/100км", "Мощность: 82 л.с.", "Объем багажника: 510 л"],
-                    "price": "от 950 000 ₽",
-                    "category": "Легковые"
-                }'>
-                    <img class="card-image" src="images/renault_logan.jpeg" alt="Renault Logan">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Logan</h3>
-                        <p class="card-description">Надежный седан для города и трассы. Идеальное сочетание цены и качества.</p>
-                        <ul class="card-features">
-                            <li>Расход: 6.1 л/100км</li>
-                            <li>Мощность: 82 л.с.</li>
-                            <li>Объем багажника: 510 л</li>
-                        </ul>
-                        <div class="card-price">от 950 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('logan')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card" data-search-index='{
-                    "title": "Renault Sandero",
-                    "description": "Компактный хэтчбек с просторным салоном и экономичным двигателем.",
-                    "features": ["Расход: 5.8 л/100км", "Мощность: 75 л.с.", "5-ступенчатая МКПП"],
-                    "price": "от 890 000 ₽",
-                    "category": "Легковые"
-                }'>
-                    <img class="card-image" src="images/renault_sander.jpg" alt="Renault Sandero">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Sandero</h3>
-                        <p class="card-description">Компактный хэтчбек с просторным салоном и экономичным двигателем.</p>
-                        <ul class="card-features">
-                            <li>Расход: 5.8 л/100км</li>
-                            <li>Мощность: 75 л.с.</li>
-                            <li>5-ступенчатая МКПП</li>
-                        </ul>
-                        <div class="card-price">от 890 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('sandero')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card" data-search-index='{
-                    "title": "Renault Sandero Stepway",
-                    "description": "Хэтчбек в кросс-кузове с увеличенным клиренсом и стильным дизайном.",
-                    "features": ["Клиренс: 195 мм", "Мощность: 90 л.с.", "Защита бампера"],
-                    "price": "от 1 100 000 ₽",
-                    "category": "Легковые"
-                }'>
-                    <img class="card-image" src="images/renault_sander_stepway.jpeg" alt="Renault Sandero Stepway">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Sandero Stepway</h3>
-                        <p class="card-description">Хэтчбек в кросс-кузове с увеличенным клиренсом и стильным дизайном.</p>
-                        <ul class="card-features">
-                            <li>Клиренс: 195 мм</li>
-                            <li>Мощность: 90 л.с.</li>
-                            <li>Защита бампера</li>
-                        </ul>
-                        <div class="card-price">от 1 100 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('stepway')">Подробнее</button>
-                    </div>
-                </div>
-
+                <!-- Карточки будут добавлены динамически через JS -->
             </div>
         </div>
 
@@ -426,70 +796,7 @@
         <div class="section" id="crossovers">
             <h2 class="section-title">Кроссоверы</h2>
             <div class="cards-grid">
-                
-                <div class="card" data-search-index='{
-                    "title": "Renault Duster",
-                    "description": "Легендарный внедорожник с полным приводом. Покоритель любых дорог.",
-                    "features": ["Полный привод 4x4", "Мощность: 114 л.с.", "Клиренс: 210 мм"],
-                    "price": "от 1 450 000 ₽",
-                    "category": "Кроссоверы"
-                }'>
-                    <img class="card-image" src="images/duster.jpeg" alt="Renault Duster">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Duster</h3>
-                        <p class="card-description">Легендарный внедорожник с полным приводом. Покоритель любых дорог.</p>
-                        <ul class="card-features">
-                            <li>Полный привод 4x4</li>
-                            <li>Мощность: 114 л.с.</li>
-                            <li>Клиренс: 210 мм</li>
-                        </ul>
-                        <div class="card-price">от 1 450 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('duster')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card" data-search-index='{
-                    "title": "Renault Kaptur",
-                    "description": "Стильный компактный кроссовер с передовыми технологиями безопасности.",
-                    "features": ["Система ESP", "Мощность: 113 л.с.", "Мультимедиа R-Link"],
-                    "price": "от 1 350 000 ₽",
-                    "category": "Кроссоверы"
-                }'>
-                    <img class="card-image" src="images/kapture.jpeg" alt="Renault Kaptur">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Kaptur</h3>
-                        <p class="card-description">Стильный компактный кроссовер с передовыми технологиями безопасности.</p>
-                        <ul class="card-features">
-                            <li>Система ESP</li>
-                            <li>Мощность: 113 л.с.</li>
-                            <li>Мультимедиа R-Link</li>
-                        </ul>
-                        <div class="card-price">от 1 350 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('kaptur')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card" data-search-index='{
-                    "title": "Renault Arkana",
-                    "description": "Элегантное кросс-купе с динамичным характером и просторным салоном.",
-                    "features": ["Купе-форма", "Мощность: 150 л.с.", "Вариатор X-Tronic"],
-                    "price": "от 1 650 000 ₽",
-                    "category": "Кроссоверы"
-                }'>
-                    <img class="card-image" src="images/arkana.jpeg" alt="Renault Arkana">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Arkana</h3>
-                        <p class="card-description">Элегантное кросс-купе с динамичным характером и просторным салоном.</p>
-                        <ul class="card-features">
-                            <li>Купе-форма</li>
-                            <li>Мощность: 150 л.с.</li>
-                            <li>Вариатор X-Tronic</li>
-                        </ul>
-                        <div class="card-price">от 1 650 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('arkana')">Подробнее</button>
-                    </div>
-                </div>
-
+                <!-- Карточки будут добавлены динамически через JS -->
             </div>
         </div>
 
@@ -497,70 +804,7 @@
         <div class="section" id="commercial">
             <h2 class="section-title">Коммерческие автомобили</h2>
             <div class="cards-grid">
-                
-                <div class="card" data-search-index='{
-                    "title": "Renault Logan Van",
-                    "description": "Коммерческая версия Logan с увеличенным багажным отделением.",
-                    "features": ["Объем багажника: 800 л", "Грузоподъемность: 500 кг", "Низкий расход топлива"],
-                    "price": "от 1 000 000 ₽",
-                    "category": "Коммерческие"
-                }'>
-                    <img class="card-image" src="images/van.jpeg" alt="Renault Logan Van">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Logan Van</h3>
-                        <p class="card-description">Коммерческая версия Logan с увеличенным багажным отделением.</p>
-                        <ul class="card-features">
-                            <li>Объем багажника: 800 л</li>
-                            <li>Грузоподъемность: 500 кг</li>
-                            <li>Низкий расход топлива</li>
-                        </ul>
-                        <div class="card-price">от 1 000 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('loganvan')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card" data-search-index='{
-                    "title": "Renault Kangoo",
-                    "description": "Компактный коммерческий автомобиль с отличной маневренностью.",
-                    "features": ["Объем: 3-4.6 м³", "Грузоподъемность: 650 кг", "Сдвижные двери"],
-                    "price": "от 1 300 000 ₽",
-                    "category": "Коммерческие"
-                }'>
-                    <img class="card-image" src="images/kangoo.jpeg" alt="Renault Kangoo">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Kangoo</h3>
-                        <p class="card-description">Компактный коммерческий автомобиль с отличной маневренностью.</p>
-                        <ul class="card-features">
-                            <li>Объем: 3-4.6 м³</li>
-                            <li>Грузоподъемность: 650 кг</li>
-                            <li>Сдвижные двери</li>
-                        </ul>
-                        <div class="card-price">от 1 300 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('kangoo')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card" data-search-index='{
-                    "title": "Renault Trafic",
-                    "description": "Универсальный коммерческий автомобиль для перевозки грузов.",
-                    "features": ["Объем: 5.2-8.6 м³", "Грузоподъемность: 1-1.5 т", "Дизельный двигатель"],
-                    "price": "от 1 800 000 ₽",
-                    "category": "Коммерческие"
-                }'>
-                    <img class="card-image" src="images/trafic.jpg" alt="Renault Trafic">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Trafic</h3>
-                        <p class="card-description">Универсальный коммерческий автомобиль для перевозки грузов.</p>
-                        <ul class="card-features">
-                            <li>Объем: 5.2-8.6 м³</li>
-                            <li>Грузоподъемность: 1-1.5 т</li>
-                            <li>Дизельный двигатель</li>
-                        </ul>
-                        <div class="card-price">от 1 800 000 ₽</div>
-                        <button class="card-button" onclick="showCarDetails('trafic')">Подробнее</button>
-                    </div>
-                </div>
-
+                <!-- Карточки будут добавлены динамически через JS -->
             </div>
         </div>
 
@@ -568,77 +812,265 @@
         <div class="section" id="electro">
             <h2 class="section-title">Электромобили и гибриды</h2>
             <div class="cards-grid">
-                
-                <div class="card ev-card" data-search-index='{
-                    "title": "Renault ZOE",
-                    "description": "Компактный электромобиль для города с впечатляющим запасом хода.",
-                    "features": ["Запас хода: 395 км", "Мощность: 135 л.с.", "Быстрая зарядка за 30 мин"],
-                    "price": "от 2 200 000 ₽",
-                    "category": "Электромобили"
-                }'>
-                    <img class="card-image" src="images/zoe.jpeg" alt="Renault ZOE">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault ZOE</h3>
-                        <p class="card-description">Компактный электромобиль для города с впечатляющим запасом хода.</p>
-                        <ul class="card-features ev-features">
-                            <li>Запас хода: 395 км</li>
-                            <li>Мощность: 135 л.с.</li>
-                            <li>Быстрая зарядка за 30 мин</li>
-                        </ul>
-                        <div class="card-price ev-price">от 2 200 000 ₽</div>
-                        <button class="card-button ev-button" onclick="showCarDetails('zoe')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card ev-card" data-search-index='{
-                    "title": "Renault Megane E-Tech",
-                    "description": "Современный электрокроссовер с технологиями нового поколения.",
-                    "features": ["Запас хода: 470 км", "Мощность: 220 л.с.", "Цифровая панель 12,3"],
-                    "price": "от 3 500 000 ₽",
-                    "category": "Электромобили"
-                }'>
-                    <img class="card-image" src="images/megane e.jpg" alt="Renault Megane E-Tech">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Megane E-Tech</h3>
-                        <p class="card-description">Современный электрокроссовер с технологиями нового поколения.</p>
-                        <ul class="card-features ev-features">
-                            <li>Запас хода: 470 км</li>
-                            <li>Мощность: 220 л.с.</li>
-                            <li>Цифровая панель 12,3"</li>
-                        </ul>
-                        <div class="card-price ev-price">от 3 500 000 ₽</div>
-                        <button class="card-button ev-button" onclick="showCarDetails('megane')">Подробнее</button>
-                    </div>
-                </div>
-
-                <div class="card ev-card" data-search-index='{
-                    "title": "Renault Captur E-Tech",
-                    "description": "Гибридный кроссовер с экономичным расходом и отличной динамикой.",
-                    "features": ["Гибридная система", "Расход: 4.5 л/100км", "Электро-привод на малых скоростях"],
-                    "price": "от 1 900 000 ₽",
-                    "category": "Гибриды"
-                }'>
-                    <img class="card-image" src="images/captur e.jpg" alt="Renault Captur E-Tech">
-                    <div class="card-content">
-                        <h3 class="card-title">Renault Captur E-Tech</h3>
-                        <p class="card-description">Гибридный кроссовер с экономичным расходом и отличной динамикой.</p>
-                        <ul class="card-features ev-features">
-                            <li>Гибридная система</li>
-                            <li>Расход: 4.5 л/100км</li>
-                            <li>Электро-привод на малых скоростях</li>
-                        </ul>
-                        <div class="card-price ev-price">от 1 900 000 ₽</div>
-                        <button class="card-button ev-button" onclick="showCarDetails('captur')">Подробнее</button>
-                    </div>
-                </div>
-
+                <!-- Карточки будут добавлены динамически через JS -->
             </div>
         </div>
-
     </div>
 
+    <!-- Скрипт ты подключаешь сам -->
+</body>
+</html>
+
 <script>
-    // Поисковая система
+    // ------------- КОРЗИНА -------------
+    // Определяем ключ для корзины в зависимости от пользователя
+    function getCartStorageKey() {
+        const userId = localStorage.getItem('currentUserId');
+        // если пользователь не залогинен – используем корзину гостя
+        return userId ? `cart_${userId}` : 'cart_guest';
+    }
+
+// Загружаем корзину для текущего пользователя/гостя
+    let cart = JSON.parse(localStorage.getItem(getCartStorageKey())) || [];
+
+    const cartModal = document.getElementById('cartModal');
+    const cartIcon = document.getElementById('cartIcon');
+    const cartCount = document.getElementById('cartCount');
+    const cartItemsContainer = document.getElementById('cartItems');
+    const cartEmpty = document.getElementById('cartEmpty');
+    const cartTotal = document.getElementById('cartTotal');
+    const totalPriceEl = document.getElementById('totalPrice');
+    const clearCartBtn = document.getElementById('clearCartBtn');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const notification = document.getElementById('notification');
+    const cartCloseBtn = document.querySelector('.cart-close');
+    const API_BASE = 'http://localhost:8080';
+
+    // ----- ГАЛЕРЕЯ ФОТО -----
+    let currentCarId = null;
+    let currentGallery = [];
+    let currentGalleryIndex = 0;
+
+    const imageGalleryModal = document.getElementById('imageGalleryModal');
+    const galleryImage = document.getElementById('galleryImage');
+    const galleryClose = document.querySelector('.gallery-close');
+    const galleryPrev = document.querySelector('.gallery-nav.prev');
+    const galleryNext = document.querySelector('.gallery-nav.next');
+    const galleryCounter = document.getElementById('galleryCounter');
+
+    function initCart() {
+        updateCartCount();
+        renderCart();
+        setupCartEventListeners();
+    }
+
+    function setupCartEventListeners() {
+        cartIcon.addEventListener('click', openCart);
+        cartCloseBtn.addEventListener('click', closeCart);
+        clearCartBtn.addEventListener('click', clearCart);
+        checkoutBtn.addEventListener('click', checkout);
+
+        window.addEventListener('click', (e) => {
+            if (e.target === cartModal) {
+                closeCart();
+            }
+        });
+    }
+
+    function addToCart(button) {
+        const id = button.dataset.id;
+        const title = button.dataset.title;
+        const price = parseInt(button.dataset.price);
+        const image = button.dataset.image;
+
+        const existingItem = cart.find(item => item.id === id);
+
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({
+                id, title, price, image, quantity: 1
+            });
+        }
+
+        saveCart();
+        updateCartCount();
+        renderCart();
+        showNotification(`${title} добавлен в корзину!`);
+        updateButtonState(button, true);
+    }
+
+    function updateButtonState(button, added) {
+        if (added) {
+            button.classList.add('added');
+            button.innerHTML = '<span class="cart-icon">✓</span> В корзине';
+            button.onclick = null;
+            button.style.cursor = 'default';
+
+            setTimeout(() => {
+                button.classList.remove('added');
+                button.innerHTML = '<span class="cart-icon">🛒</span> Добавить в корзину';
+                button.onclick = function() { addToCart(this); };
+                button.style.cursor = 'pointer';
+            }, 3000);
+        }
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(item => item.id !== id);
+        saveCart();
+        updateCartCount();
+        renderCart();
+        updateCartButtons();
+    }
+
+    function clearCart() {
+        if (cart.length === 0) return;
+        if (confirm('Вы уверены, что хотите очистить корзину?')) {
+            cart = [];
+            saveCart();
+            updateCartCount();
+            renderCart();
+            updateCartButtons();
+            showNotification('Корзина очищена');
+        }
+    }
+
+    function checkout() {
+        if (cart.length === 0) {
+            alert('Корзина пуста! Добавьте автомобили для оформления заказа.');
+            return;
+        }
+
+        let message = 'Заявка на автомобили:\n\n';
+        cart.forEach(item => {
+            message += `${item.title} - ${formatPrice(item.price)} (${item.quantity} шт.)\n`;
+        });
+
+        const total = calculateTotal();
+        message += `\nОбщая стоимость: ${formatPrice(total)}`;
+        message += '\n\nПожалуйста, оставьте ваши контактные данные для связи:';
+
+        const name = prompt('Введите ваше имя:');
+        if (!name) return;
+
+        const phone = prompt('Введите ваш номер телефона:');
+        if (!phone) return;
+
+        const email = prompt('Введите ваш email:');
+
+        message += `\n\nКонтактные данные:\nИмя: ${name}\nТелефон: ${phone}`;
+        if (email) message += `\nEmail: ${email}`;
+
+        console.log('Заявка отправлена:', message);
+
+        alert(`Спасибо за заявку, ${name}! Наш менеджер свяжется с вами в ближайшее время по телефону ${phone}.`);
+
+        cart = [];
+        saveCart();
+        updateCartCount();
+        renderCart();
+        updateCartButtons();
+        closeCart();
+    }
+
+    function saveCart() {
+        localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
+    }
+
+    function updateCartCount() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCount.textContent = totalItems;
+
+        if (totalItems > 0) {
+            cartCount.style.display = 'flex';
+        } else {
+            cartCount.style.display = 'none';
+        }
+    }
+
+    function renderCart() {
+        cartItemsContainer.innerHTML = '';
+
+        if (cart.length === 0) {
+            cartEmpty.style.display = 'block';
+            cartTotal.style.display = 'none';
+            return;
+        }
+
+        cartEmpty.style.display = 'none';
+        cartTotal.style.display = 'block';
+
+        cart.forEach(item => {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            cartItem.innerHTML = `
+                <img src="${item.image}" alt="${item.title}" class="cart-item-image">
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.title}</div>
+                    <div class="cart-item-price">${formatPrice(item.price)}</div>
+                    <div>Количество: ${item.quantity}</div>
+                </div>
+                <button class="remove-item" onclick="removeFromCart('${item.id}')">Удалить</button>
+            `;
+            cartItemsContainer.appendChild(cartItem);
+        });
+
+        const total = calculateTotal();
+        totalPriceEl.textContent = `${formatPrice(total)}`;
+    }
+
+    function updateCartButtons() {
+        document.querySelectorAll('.cart-btn').forEach(button => {
+            const id = button.dataset.id;
+            const inCart = cart.some(item => item.id === id);
+
+            if (inCart) {
+                button.classList.add('added');
+                button.innerHTML = '<span class="cart-icon">✓</span> В корзине';
+                button.onclick = null;
+                button.style.cursor = 'default';
+            } else {
+                button.classList.remove('added');
+                button.innerHTML = '<span class="cart-icon">🛒</span> Добавить в корзину';
+                button.onclick = function() { addToCart(this); };
+                button.style.cursor = 'pointer';
+            }
+        });
+    }
+
+    function calculateTotal() {
+        return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+
+    function formatPrice(price) {
+        return new Intl.NumberFormat('ru-RU', {
+            style: 'currency',
+            currency: 'RUB',
+            minimumFractionDigits: 0
+        }).format(price);
+    }
+
+    function showNotification(message) {
+        notification.textContent = message;
+        notification.classList.add('show');
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    function openCart() {
+        cartModal.style.display = 'block';
+        renderCart();
+    }
+
+    function closeCart() {
+        cartModal.style.display = 'none';
+    }
+
+    // ------------- ПОИСК + ФИЛЬТР -------------
+
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
     const clearSearch = document.getElementById('clearSearch');
@@ -648,28 +1080,26 @@
     const categoryBtns = document.querySelectorAll('.category-btn');
     const totalCountEl = document.getElementById('totalCount');
     const foundCountEl = document.getElementById('foundCount');
-    const cards = document.querySelectorAll('.card');
+
+    let cards = []; // теперь мы заполняем это после загрузки с API
     const sections = document.querySelectorAll('.section');
-    
+
     let activeCategory = 'all';
     let lastSearchTerm = '';
-    
-    // Инициализация
+
     function initSearch() {
+        cards = Array.from(document.querySelectorAll('.card'));
         totalCountEl.textContent = cards.length;
         updateSearchStats();
-        
-        // Обработчик кнопки поиска
+
         searchButton.addEventListener('click', performSearch);
-        
-        // Поиск по Enter
+
         searchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 performSearch();
             }
         });
-        
-        // Обработчик очистки поиска
+
         clearSearch.addEventListener('click', function() {
             searchInput.value = '';
             lastSearchTerm = '';
@@ -677,8 +1107,7 @@
             performSearch();
             this.classList.add('hidden');
         });
-        
-        // Обработчик кнопки "Сбросить фильтры"
+
         tryAgainBtn.addEventListener('click', function() {
             searchInput.value = '';
             lastSearchTerm = '';
@@ -686,8 +1115,7 @@
             performSearch();
             searchInput.focus();
         });
-        
-        // Обработчики фильтра категорий
+
         categoryBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 const category = this.dataset.category;
@@ -695,8 +1123,7 @@
                 performSearch();
             });
         });
-        
-        // Автопоиск при изменении текста (с задержкой)
+
         let searchTimeout;
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
@@ -707,8 +1134,7 @@
             }, 300);
         });
     }
-    
-    // Установка активной категории
+
     function setActiveCategory(category) {
         activeCategory = category;
         categoryBtns.forEach(btn => {
@@ -718,46 +1144,37 @@
             }
         });
     }
-    
-    // Выполнение поиска
+
     function performSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         lastSearchTerm = searchTerm;
         let foundCount = 0;
-        let visibleSections = 0;
-        
-        // Скрыть сообщение об отсутствии результатов
+
         noResults.classList.remove('show');
-        
-        // Показать/скрыть кнопку очистки
+
         if (searchTerm || activeCategory !== 'all') {
             clearSearch.classList.remove('hidden');
         } else {
             clearSearch.classList.add('hidden');
         }
-        
-        // Сначала показываем все карточки и секции
+
         cards.forEach(card => {
             card.classList.remove('hidden');
-            // Удаляем предыдущую подсветку
             const title = card.querySelector('.card-title');
             const description = card.querySelector('.card-description');
             if (title) title.innerHTML = title.textContent;
             if (description) description.innerHTML = description.textContent;
         });
         sections.forEach(section => section.classList.remove('hidden'));
-        
-        // Если есть поисковый запрос или активная категория не "все"
+
         if (searchTerm || activeCategory !== 'all') {
             cards.forEach(card => {
                 const cardData = JSON.parse(card.dataset.searchIndex || '{}');
                 const shouldShow = isCardMatch(cardData, searchTerm, activeCategory);
-                
+
                 if (shouldShow) {
                     card.classList.remove('hidden');
                     foundCount++;
-                    
-                    // Подсветка найденных слов
                     if (searchTerm) {
                         highlightMatches(card, cardData, searchTerm);
                     }
@@ -765,34 +1182,28 @@
                     card.classList.add('hidden');
                 }
             });
-            
-            // Управление видимостью секций
+
             sections.forEach(section => {
                 const sectionCards = section.querySelectorAll('.card:not(.hidden)');
                 if (sectionCards.length === 0) {
                     section.classList.add('hidden');
                 } else {
                     section.classList.remove('hidden');
-                    visibleSections++;
                 }
             });
-            
-            // Показать сообщение, если ничего не найдено
+
             if (foundCount === 0) {
                 noResults.classList.add('show');
             }
         } else {
-            // Если нет поиска и выбраны все категории - показываем все
             cards.forEach(card => {
                 card.classList.remove('hidden');
                 foundCount++;
             });
-            visibleSections = sections.length;
         }
-        
+
         updateSearchStats(foundCount);
-        
-        // Прокрутка к результатам если есть поиск
+
         if (searchTerm && foundCount > 0) {
             const firstVisibleCard = document.querySelector('.card:not(.hidden)');
             if (firstVisibleCard) {
@@ -800,10 +1211,8 @@
             }
         }
     }
-    
-    // Проверка совпадения карточки с поиском
+
     function isCardMatch(cardData, searchTerm, category) {
-        // Проверка категории
         if (category !== 'all') {
             const categoryMap = {
                 'light-cars': 'Легковые',
@@ -811,10 +1220,10 @@
                 'commercial': 'Коммерческие',
                 'electro': ['Электромобили', 'Гибриды']
             };
-            
+
             const targetCategory = categoryMap[category];
             const cardCategory = cardData.category || '';
-            
+
             if (Array.isArray(targetCategory)) {
                 if (!targetCategory.includes(cardCategory)) {
                     return false;
@@ -823,33 +1232,29 @@
                 return false;
             }
         }
-        
-        // Если нет поискового запроса - показываем карточку
+
         if (!searchTerm) return true;
-        
-        // Проверка поискового запроса во всех полях
+
         const searchFields = [
             cardData.title || '',
             cardData.description || '',
             cardData.price || '',
             ...(cardData.features || [])
         ];
-        
+
         const searchText = searchFields.join(' ').toLowerCase();
         const terms = searchTerm.split(' ').filter(term => term.length > 0);
-        
-        // Поиск по всем словам (AND логика)
+
         return terms.every(term => searchText.includes(term));
     }
-    
-    // Подсветка найденных совпадений
+
     function highlightMatches(card, cardData, searchTerm) {
         const terms = searchTerm.split(' ').filter(term => term.length > 0);
         const elementsToHighlight = [
             { element: card.querySelector('.card-title'), text: cardData.title || '' },
             { element: card.querySelector('.card-description'), text: cardData.description || '' }
         ];
-        
+
         elementsToHighlight.forEach(item => {
             if (item.element && item.text) {
                 let highlightedText = item.text;
@@ -861,41 +1266,76 @@
             }
         });
     }
-    
-    // Экранирование специальных символов для RegExp
+
     function escapeRegExp(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
-    
-    // Обновление статистики поиска
+
     function updateSearchStats(foundCount = null) {
         const totalCount = cards.length;
         foundCount = foundCount !== null ? foundCount : totalCount;
-        
+
         totalCountEl.textContent = totalCount;
         foundCountEl.textContent = foundCount;
-        
-        // Обновляем цвет счетчика
+
         if (foundCount === totalCount) {
             foundCountEl.style.color = '';
         } else if (foundCount > 0) {
-            foundCountEl.style.color = '#28a745'; // зеленый
+            foundCountEl.style.color = '#28a745';
         } else {
-            foundCountEl.style.color = '#dc3545'; // красный
+            foundCountEl.style.color = '#dc3545';
         }
     }
-    
-    // Модальное окно (существующий код)
-    const modal = document.getElementById('carModal');
+
+    function openCurrentCarGallery(startIndex = 0) {
+        if (!currentGallery || currentGallery.length === 0) return;
+        showGalleryImage(startIndex);
+        imageGalleryModal.style.display = 'block';
+    }
+
+    function showGalleryImage(index) {
+        if (!currentGallery || currentGallery.length === 0) return;
+
+        if (index < 0) index = currentGallery.length - 1;
+        if (index >= currentGallery.length) index = 0;
+
+        currentGalleryIndex = index;
+        galleryImage.src = currentGallery[currentGalleryIndex];
+        galleryCounter.textContent = `${currentGalleryIndex + 1} / ${currentGallery.length}`;
+    }
+
+    galleryPrev.addEventListener('click', function() {
+        showGalleryImage(currentGalleryIndex - 1);
+    });
+
+    galleryNext.addEventListener('click', function() {
+        showGalleryImage(currentGalleryIndex + 1);
+    });
+
+    galleryClose.addEventListener('click', function() {
+        imageGalleryModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === imageGalleryModal) {
+            imageGalleryModal.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            imageGalleryModal.style.display = 'none';
+        }
+    });
+
+    // ------------- МОДАЛКА АВТО -------------
+
+    const carModal = document.getElementById('carModal');
     const closeBtn = document.querySelector('.close');
 
-    async function showCarDetails(carId) {
+     async function showCarDetails(carId) {
         try {
-            console.log(`Запрашиваю данные для автомобиля: ${carId}`);
-            
-            const response = await fetch(`http://localhost:8080/api/cars/${carId}`);
-            console.log('Ответ сервера:', response.status);
-            
+            const response = await fetch(`${API_BASE}/api/cars/${carId}`);
             if (!response.ok) {
                 if (response.status === 404) {
                     alert('Автомобиль не найден в базе данных');
@@ -904,21 +1344,36 @@
                 }
                 return;
             }
-            
+
             const car = await response.json();
-            console.log('Полученные данные:', car);
-            
-            // Заполняем модальное окно данными
+
             document.getElementById('modalCarTitle').textContent = car.title || car.model;
-            document.getElementById('modalPrice').textContent = `от ${car.price} ₽`;
-            document.getElementById('modalImage').src = car.image;
-            document.getElementById('modalImage').alt = car.title || car.model;
+            document.getElementById('modalPrice').textContent = `от ${formatPrice(car.price)}`;
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = car.image;
+            modalImage.alt = car.title || car.model;
             document.getElementById('modalDescription').textContent = car.description || 'Описание отсутствует';
 
-            // Заполняем технические характеристики
+            // ----- НАСТРОЙКА ГАЛЕРЕИ -----
+            currentCarId = car.id || carId;
+
+            if (car.images && car.images.length > 0) {
+                currentGallery = car.images;
+            } else if (car.image) {
+                currentGallery = [car.image];
+            } else {
+                currentGallery = [];
+            }
+            currentGalleryIndex = 0;
+
+            // клик по фотке в модалке – открываем галерею
+            modalImage.onclick = function () {
+                openCurrentCarGallery(0);
+            };
+            // ------------------------------
+
             const techSpecsList = document.getElementById('techSpecs');
             techSpecsList.innerHTML = '';
-            
             if (car.techSpecs && car.techSpecs.length > 0) {
                 car.techSpecs.forEach(spec => {
                     const li = document.createElement('li');
@@ -929,10 +1384,8 @@
                 techSpecsList.innerHTML = '<li>Характеристики отсутствуют</li>';
             }
 
-            // Заполняем комплектацию
             const equipmentList = document.getElementById('equipmentSpecs');
             equipmentList.innerHTML = '';
-            
             if (car.equipment && car.equipment.length > 0) {
                 car.equipment.forEach(item => {
                     const li = document.createElement('li');
@@ -943,10 +1396,8 @@
                 equipmentList.innerHTML = '<li>Комплектация не указана</li>';
             }
 
-            // Заполняем особенности
             const featuresGrid = document.getElementById('featuresGrid');
             featuresGrid.innerHTML = '';
-            
             if (car.features && car.features.length > 0) {
                 car.features.forEach(feature => {
                     const div = document.createElement('div');
@@ -958,34 +1409,106 @@
                 featuresGrid.innerHTML = '<div class="feature-item">Особенности не указаны</div>';
             }
 
-            // Показываем модальное окно
-            modal.style.display = 'block';
-            
+            carModal.style.display = 'block';
         } catch (error) {
             console.error('Error loading car details:', error);
             alert(`Ошибка при загрузке данных автомобиля: ${error.message}`);
         }
     }
 
-    // Закрываем модальное окно
     closeBtn.addEventListener('click', function() {
-        modal.style.display = 'none';
+        carModal.style.display = 'none';
     });
 
     window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
+        if (event.target === carModal) {
+            carModal.style.display = 'none';
         }
     });
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
-            modal.style.display = 'none';
+            carModal.style.display = 'none';
         }
     });
-    
-    // Инициализация поиска при загрузке страницы
-    document.addEventListener('DOMContentLoaded', initSearch);
+
+    // ------------- ЗАГРУЗКА АВТО С БЕКЕНДА -------------
+
+    async function loadCars() {
+    try {
+        const response = await fetch(`${API_BASE}/api/cars`);
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки списка автомобилей: ' + response.status);
+        }
+
+        const carsData = await response.json();
+
+        const sectionMap = {
+            'Легковые': document.querySelector('#light-cars .cards-grid'),
+            'Кроссоверы': document.querySelector('#crossovers .cards-grid'),
+            'Коммерческие': document.querySelector('#commercial .cards-grid'),
+            'Электромобили': document.querySelector('#electro .cards-grid'),
+            'Гибриды': document.querySelector('#electro .cards-grid')
+        };
+
+        carsData.forEach(car => {
+            const container = sectionMap[car.category];
+            if (!container) return;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.searchIndex = JSON.stringify({
+                title: car.title,
+                description: car.description,
+                features: car.features,
+                price: `от ${formatPrice(car.price)}`,
+                category: car.category,
+                image: car.image,
+                id: car.id
+            });
+
+            card.innerHTML = `
+                <img class="card-image" src="${car.image}" alt="${car.title}">
+                <div class="card-content">
+                    <h3 class="card-title">${car.title}</h3>
+                    <p class="card-description">${car.description}</p>
+                    <ul class="card-features">
+                        ${car.features.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                    <div class="card-price">от ${formatPrice(car.price)}</div>
+                    <button class="card-button" onclick="showCarDetails('${car.id}')">Подробнее</button>
+                    <button class="cart-btn"
+                        data-id="${car.id}"
+                        data-title="${car.title}"
+                        data-price="${car.price}"
+                        data-image="${car.image}">
+                        <span class="cart-icon">🛒</span> Добавить в корзину
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+
+        // Обновляем список карточек для поиска
+        cards = Array.from(document.querySelectorAll('.card'));
+        totalCountEl.textContent = cards.length;
+
+        initSearch();
+        updateCartButtons();
+    } catch (e) {
+        console.error('loadCars error:', e);
+        alert('Не удалось загрузить каталог автомобилей с сервера');
+    }
+}
+
+    // ------------- ИНИЦИАЛИЗАЦИЯ -------------
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initCart();
+        loadCars();
+    });
 </script>
+
 </body>
 </html>
