@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"renault-backend/database"
 	"renault-backend/handlers"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/cors"
@@ -97,6 +99,21 @@ func main() {
 	// если нужно будет фильтровать по категории:
 	// api.HandleFunc("/cars/category/{category}", getCarsByCategoryHandler).Methods("GET")
 
+	// Каталог автомобилей — публичные GET
+	api.HandleFunc("/cars", getAllCarsHandler).Methods("GET")
+	api.HandleFunc("/cars/{id}", getCarByIDHandler).Methods("GET")
+	// api.HandleFunc("/cars/category/{category}", getCarsByCategoryHandler).Methods("GET")
+
+	// ----- АДМИНСКИЕ РОУТЫ ДЛЯ КАТАЛОГА -----
+	admin := api.PathPrefix("/admin").Subrouter()
+
+	// защищаем все маршруты /api/admin/...
+	admin.Use(JWTAdminMiddleware)
+
+	admin.HandleFunc("/cars", createCarHandler).Methods("POST")
+	admin.HandleFunc("/cars/{id}", updateCarHandler).Methods("PUT")
+	admin.HandleFunc("/cars/{id}", deleteCarHandler).Methods("DELETE")
+
 	// ---------- CORS ----------
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // в проде лучше ограничить
@@ -156,8 +173,184 @@ func createCarTables() error {
             image_path TEXT NOT NULL,
             FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
         );
+
     `)
+
 	return err
+}
+
+func createCarHandler(w http.ResponseWriter, r *http.Request) {
+	var c Car
+	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+
+	// ID либо приходит с фронта, либо можно сгенерировать (slug/uuid)
+	if c.ID == "" {
+		http.Error(w, "id is required", http.StatusBadRequest)
+		return
+	}
+
+	tx, err := carDB.Begin()
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	// вставляем запись в cars
+	_, err = tx.Exec(`
+        INSERT INTO cars (id, title, description, category, image, base_price)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `, c.ID, c.Title, c.Description, c.Category, c.Image, c.Price)
+	if err != nil {
+		http.Error(w, "db error: insert car", http.StatusInternalServerError)
+		return
+	}
+
+	// features
+	if len(c.Features) > 0 {
+		stmt, err := tx.Prepare(`INSERT INTO car_features (car_id, name) VALUES (?, ?)`)
+		if err != nil {
+			http.Error(w, "db error: prepare features", http.StatusInternalServerError)
+			return
+		}
+		defer stmt.Close()
+
+		for _, f := range c.Features {
+			if _, err := stmt.Exec(c.ID, f); err != nil {
+				http.Error(w, "db error: insert feature", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	// images
+	if len(c.Images) > 0 {
+		stmt, err := tx.Prepare(`INSERT INTO car_images (car_id, image_path) VALUES (?, ?)`)
+		if err != nil {
+			http.Error(w, "db error: prepare images", http.StatusInternalServerError)
+			return
+		}
+		defer stmt.Close()
+
+		for _, img := range c.Images {
+			if _, err := stmt.Exec(c.ID, img); err != nil {
+				http.Error(w, "db error: insert image", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		http.Error(w, "db error: commit", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"status": "created", "id": c.ID})
+}
+
+func updateCarHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var c Car
+	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+
+	// на всякий случай принудительно проставим id
+	c.ID = id
+
+	tx, err := carDB.Begin()
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	// обновляем основную запись
+	_, err = tx.Exec(`
+        UPDATE cars
+        SET title = ?, description = ?, category = ?, image = ?, base_price = ?
+        WHERE id = ?
+    `, c.Title, c.Description, c.Category, c.Image, c.Price, c.ID)
+	if err != nil {
+		http.Error(w, "db error: update car", http.StatusInternalServerError)
+		return
+	}
+
+	// проще всего – удалить старые features/images и записать новые
+	if _, err := tx.Exec(`DELETE FROM car_features WHERE car_id = ?`, c.ID); err != nil {
+		http.Error(w, "db error: clear features", http.StatusInternalServerError)
+		return
+	}
+	if _, err := tx.Exec(`DELETE FROM car_images WHERE car_id = ?`, c.ID); err != nil {
+		http.Error(w, "db error: clear images", http.StatusInternalServerError)
+		return
+	}
+
+	if len(c.Features) > 0 {
+		stmt, err := tx.Prepare(`INSERT INTO car_features (car_id, name) VALUES (?, ?)`)
+		if err != nil {
+			http.Error(w, "db error: prepare features", http.StatusInternalServerError)
+			return
+		}
+		defer stmt.Close()
+		for _, f := range c.Features {
+			if _, err := stmt.Exec(c.ID, f); err != nil {
+				http.Error(w, "db error: insert feature", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	if len(c.Images) > 0 {
+		stmt, err := tx.Prepare(`INSERT INTO car_images (car_id, image_path) VALUES (?, ?)`)
+		if err != nil {
+			http.Error(w, "db error: prepare images", http.StatusInternalServerError)
+			return
+		}
+		defer stmt.Close()
+		for _, img := range c.Images {
+			if _, err := stmt.Exec(c.ID, img); err != nil {
+				http.Error(w, "db error: insert image", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		http.Error(w, "db error: commit", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(map[string]string{"status": "updated"})
+}
+
+func deleteCarHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	res, err := carDB.Exec(`DELETE FROM cars WHERE id = ?`, id)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+
+	affected, _ := res.RowsAffected()
+	if affected == 0 {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
 }
 
 func seedCarData() error {
@@ -495,4 +688,41 @@ func getCarsByCategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(cars)
+}
+
+func JWTAdminMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(w, "missing or invalid Authorization header", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, http.ErrAbortHandler
+			}
+			return []byte(JWT_SECRET), nil
+		})
+		if err != nil || !token.Valid {
+			http.Error(w, "invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Error(w, "invalid token claims", http.StatusUnauthorized)
+			return
+		}
+
+		isAdmin, _ := claims["is_admin"].(bool)
+		if !isAdmin {
+			http.Error(w, "forbidden: admin only", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

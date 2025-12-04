@@ -895,7 +895,7 @@ function saveAuthData(token, user) {
             localStorage.setItem('user_email', user.email);
         }
 
-        // 🟢 САМОЕ ВАЖНОЕ: сохраняем ID пользователя для корзины
+        // ID для корзины – оставляем как было
         if (user.id !== undefined && user.id !== null) {
             localStorage.setItem('user_id', user.id);
             localStorage.setItem('currentUserId', user.id.toString());
@@ -904,9 +904,19 @@ function saveAuthData(token, user) {
             console.warn('user.id не пришёл с сервера, currentUserId не установлен');
         }
 
+        // 🔹 НОВОЕ: флаг админа
+        if (typeof user.is_admin !== 'undefined') {
+            localStorage.setItem('is_admin', user.is_admin ? 'true' : 'false');
+        } else {
+            // на всякий случай
+            localStorage.setItem('is_admin', 'false');
+        }
+
         console.log('User data saved to localStorage:', user);
     }
 }
+
+
 
 // Проверка, авторизован ли пользователь
 function isUserLoggedIn() {
@@ -984,15 +994,11 @@ function updateUIAfterLogin(username) {
 function logout() {
     showNotification('👋 До свидания! Вы вышли из системы.', 'info');
 
-    // чистим данные авторизации
     localStorage.removeItem('auth_token');
     localStorage.removeItem('username');
     localStorage.removeItem('user_email');
-
-    // 🟢 ВАЖНО: отвязываем текущего пользователя от корзины
     localStorage.removeItem('currentUserId');
-
-    // ⛔ НЕ трогаем cart_* — корзины остаются, чтобы при следующем входе под тем же пользователем они подтянулись
+    localStorage.removeItem('is_admin');   // 👈 добавить
 
     console.log('User logged out, auth data cleared, currentUserId removed');
     setTimeout(() => {
@@ -1077,6 +1083,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Загружаем правила паролей
     loadPasswordRules();
+
+    initCart();
+    loadCars();
+
+    if (username) {
+        userNameLink.textContent = username;
+        userNameLink.addEventListener('click', function () {
+            // открываем личный кабинет
+            window.location.href = 'profile.html';
+        });
+    } else {
+        // если пользователь не залогинен – можно вообще скрыть блок
+        const userHeader = document.querySelector('.user-header');
+        if (userHeader) userHeader.style.display = 'none';
+    }
 });
 
 
@@ -1287,3 +1308,37 @@ function openPrivacyModal() {
                 });
             }
         });
+
+
+
+function downloadDocument(modalId, fileName) {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+        console.error('Модальное окно не найдено:', modalId);
+        return;
+    }
+
+    const textBlock = modal.querySelector('.modal-text');
+    if (!textBlock) {
+        console.error('Блок .modal-text не найден внутри', modalId);
+        return;
+    }
+
+    const text = textBlock.innerText.trim();
+    if (!text) {
+        console.error('Текст для скачивания пустой');
+        return;
+    }
+
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+}

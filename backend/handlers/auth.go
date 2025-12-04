@@ -64,7 +64,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Создаем пользователя
+	// Создаем пользователя (пока без ID)
 	var user models.User
 	user.Username = strings.TrimSpace(req.Username)
 	user.Email = strings.TrimSpace(req.Email)
@@ -75,23 +75,27 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Сохраняем в БД
-	if err := h.userRepo.CreateUser(user.Username, user.Email, user.Password); err != nil {
+	isAdmin := h.isAdmin(user.Username)
+
+	// Сохраняем в БД с правильным флагом
+	if err := h.userRepo.CreateUser(user.Username, user.Email, user.Password, isAdmin); err != nil {
 		sendError(w, "Ошибка при создании пользователя", http.StatusInternalServerError, nil)
 		return
 	}
 
-	// Генерируем JWT токен
-	token, err := h.generateToken(user.Username)
+	println(user.Username, "username")
+	// ЕЩЁ РАЗ читаем пользователя из БД, чтобы получить ID
+	createdUser, err := h.userRepo.GetUserByUsername(user.Username)
+	println(createdUser.Email, "email is register user")
 	if err != nil {
-		sendError(w, "Ошибка при генерации токена", http.StatusInternalServerError, nil)
+		sendError(w, "Ошибка при получении данных пользователя", http.StatusInternalServerError, nil)
 		return
 	}
 
-	// Получаем созданного пользователя для ответа
-	createdUser, err := h.userRepo.GetUserByUsername(user.Username)
+	// Генерируем JWT токен c признаком is_admin
+	token, err := h.generateToken(createdUser.Username, isAdmin)
 	if err != nil {
-		sendError(w, "Ошибка при получении данных пользователя", http.StatusInternalServerError, nil)
+		sendError(w, "Ошибка при генерации токена", http.StatusInternalServerError, nil)
 		return
 	}
 
@@ -103,12 +107,27 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			ID:       createdUser.ID,
 			Username: createdUser.Username,
 			Email:    createdUser.Email,
+			IsAdmin:  isAdmin,
 		},
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
+}
+
+func (h *AuthHandler) isAdmin(username string) bool {
+	// используем глобальную DB из пакета database
+	var count int
+	err := database.DB.QueryRow(
+		"SELECT COUNT(*) FROM admins WHERE username = ?",
+		username,
+	).Scan(&count)
+	println(count, "true or false on table admins")
+	if err != nil {
+		return false
+	}
+	return count > 0
 }
 
 // Login обрабатывает вход пользователя
@@ -145,8 +164,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Генерируем JWT токен
-	token, err := h.generateToken(user.Username)
+	isAdmin := h.isAdmin(user.Username)
+
+	// Генерируем JWT токен c признаком is_admin
+	token, err := h.generateToken(user.Username, isAdmin)
 	if err != nil {
 		sendError(w, "Ошибка при генерации токена", http.StatusInternalServerError, nil)
 		return
@@ -160,6 +181,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
+			IsAdmin:  isAdmin, // <-- вот тут важно
 		},
 	}
 
@@ -236,11 +258,11 @@ func (h *AuthHandler) validateLogin(req models.LoginRequest) []string {
 	return errors
 }
 
-// GenerateToken генерирует JWT токен
-func (h *AuthHandler) generateToken(username string) (string, error) {
+func (h *AuthHandler) generateToken(username string, isAdmin bool) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24 * 7).Unix(), // 7 дней
+		"is_admin": isAdmin, // <-- claim
+		"exp":      time.Now().Add(7 * 24 * time.Hour).Unix(),
 		"iat":      time.Now().Unix(),
 		"type":     "access",
 	})

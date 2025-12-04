@@ -7,6 +7,29 @@
     <link rel="stylesheet" href="styles/style2.css">
     <style>
         /* Стили для поиска */
+
+                .user-header {
+            margin-right: 15px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .user-name {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .user-name:hover {
+            background: #0078D7;
+            color: #fff;
+            border-color: #0078D7;
+        }
+
         .search-container {
             max-width: 1200px;
             margin: 20px auto 30px;
@@ -636,6 +659,43 @@
                 padding: 8px 12px;
             }
         }
+
+        .cart-item-quantity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+    .quantity-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #ccc;
+        background: #fff;
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .quantity-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .quantity-value {
+        min-width: 24px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Заблокированная кнопка корзины для гостей */
+    .disabled-cart {
+        background: #6c757d;
+        opacity: 0.9;
+    }
+
     </style>
 </head>
 <body>
@@ -669,6 +729,16 @@
                 <span class="cart-count" id="cartCount">0</span>
             </div>
         </div>
+
+        <!-- <div class="cart-header">
+            <div class="user-header">
+                <span id="userNameLink" class="user-name"></span>
+            </div>
+            <div class="cart-icon-header" id="cartIcon">
+                🛒
+                <span class="cart-count" id="cartCount">0</span>
+            </div> -->
+
     </div>
 
     <!-- Информация о поиске -->
@@ -825,13 +895,20 @@
     // ------------- КОРЗИНА -------------
     // Определяем ключ для корзины в зависимости от пользователя
     function getCartStorageKey() {
-        const userId = localStorage.getItem('currentUserId');
-        // если пользователь не залогинен – используем корзину гостя
-        return userId ? `cart_${userId}` : 'cart_guest';
+    const userId = localStorage.getItem('currentUserId');
+    // если пользователь не залогинен – ключа нет
+    return userId ? `cart_${userId}` : null;
     }
 
-// Загружаем корзину для текущего пользователя/гостя
-    let cart = JSON.parse(localStorage.getItem(getCartStorageKey())) || [];
+    // Ключ и флаг авторизации
+    const CART_STORAGE_KEY = getCartStorageKey();
+    const isLoggedIn = !!CART_STORAGE_KEY;
+
+    // Загружаем корзину только для авторизованного пользователя
+    let cart = [];
+    if (isLoggedIn) {
+        cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || [];
+    }
 
     const cartModal = document.getElementById('cartModal');
     const cartIcon = document.getElementById('cartIcon');
@@ -878,6 +955,12 @@
     }
 
     function addToCart(button) {
+        // Гость не может добавлять в корзину
+        if (!isLoggedIn) {
+            alert('Добавление в корзину доступно только авторизованным пользователям. Пожалуйста, войдите в систему.');
+            return;
+        }
+
         const id = button.dataset.id;
         const title = button.dataset.title;
         const price = parseInt(button.dataset.price);
@@ -898,7 +981,28 @@
         renderCart();
         showNotification(`${title} добавлен в корзину!`);
         updateButtonState(button, true);
+}
+
+function initCategoryFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const categoryFromUrl = params.get('category');
+
+    if (!categoryFromUrl) return;
+
+    const btn = Array.from(document.querySelectorAll('.category-btn'))
+        .find(b => b.dataset.category === categoryFromUrl);
+
+    if (!btn) return;
+
+    setActiveCategory(categoryFromUrl);
+    performSearch();
+
+    const section = document.getElementById(categoryFromUrl);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+}
+
 
     function updateButtonState(button, added) {
         if (added) {
@@ -975,10 +1079,19 @@
     }
 
     function saveCart() {
-        localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
-    }
+    // если пользователь не авторизован – ничего не сохраняем
+    if (!CART_STORAGE_KEY) return;
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+}
 
     function updateCartCount() {
+        if (!isLoggedIn) {
+            // для гостя просто скрываем счетчик
+            cartCount.style.display = 'none';
+            cartCount.textContent = '0';
+            return;
+        }
+
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         cartCount.textContent = totalItems;
 
@@ -987,7 +1100,8 @@
         } else {
             cartCount.style.display = 'none';
         }
-    }
+}
+
 
     function renderCart() {
         cartItemsContainer.innerHTML = '';
@@ -1009,7 +1123,11 @@
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.title}</div>
                     <div class="cart-item-price">${formatPrice(item.price)}</div>
-                    <div>Количество: ${item.quantity}</div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn" onclick="changeQuantity('${item.id}', -1)">−</button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="changeQuantity('${item.id}', 1)">+</button>
+                    </div>
                 </div>
                 <button class="remove-item" onclick="removeFromCart('${item.id}')">Удалить</button>
             `;
@@ -1020,8 +1138,46 @@
         totalPriceEl.textContent = `${formatPrice(total)}`;
     }
 
+    function changeQuantity(id, delta) {
+        const item = cart.find(i => i.id === id);
+        if (!item) return;
+
+        item.quantity += delta;
+
+        // если стало 0 или меньше – спрашиваем, удалить ли товар
+        if (item.quantity <= 0) {
+            if (confirm('Удалить этот автомобиль из корзины?')) {
+                removeFromCart(id);
+                return;
+            } else {
+                item.quantity = 1;
+            }
+        }
+
+        saveCart();
+        updateCartCount();
+        renderCart();
+        updateCartButtons();
+    }
+
     function updateCartButtons() {
-        document.querySelectorAll('.cart-btn').forEach(button => {
+        const buttons = document.querySelectorAll('.cart-btn');
+
+        // Если пользователь не авторизован – блокируем все кнопки корзины
+        if (!isLoggedIn) {
+            buttons.forEach(button => {
+                button.classList.add('disabled-cart');
+                button.innerHTML = '<span class="cart-icon">🔒</span> Войдите, чтобы добавить';
+                button.onclick = function () {
+                    alert('Добавление в корзину доступно только авторизованным пользователям. Пожалуйста, войдите в систему.');
+                };
+                button.style.cursor = 'pointer';
+            });
+            return;
+        }
+
+        // Для авторизованного пользователя – обычное поведение
+        buttons.forEach(button => {
             const id = button.dataset.id;
             const inCart = cart.some(item => item.id === id);
 
@@ -1037,7 +1193,8 @@
                 button.style.cursor = 'pointer';
             }
         });
-    }
+}
+
 
     function calculateTotal() {
         return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -1061,9 +1218,14 @@
     }
 
     function openCart() {
+        if (!isLoggedIn) {
+            alert('Просмотр корзины доступен только авторизованным пользователям. Пожалуйста, войдите в систему.');
+            return;
+        }
         cartModal.style.display = 'block';
         renderCart();
-    }
+}
+
 
     function closeCart() {
         cartModal.style.display = 'none';
@@ -1495,6 +1657,7 @@
         totalCountEl.textContent = cards.length;
 
         initSearch();
+        initCategoryFromUrl(); // вот эта строчка важна
         updateCartButtons();
     } catch (e) {
         console.error('loadCars error:', e);

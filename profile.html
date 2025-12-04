@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет | Renault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/style2.css">
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .lk-wrapper {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px 40px;
+        }
+
+        .lk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .lk-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .lk-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lk-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all .2s ease;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .lk-btn:hover {
+            background: #0078D7;
+            color: #fff;
+            border-color: #0078D7;
+        }
+
+        .lk-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .lk-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .lk-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 22px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+
+        .lk-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #222;
+        }
+
+        .lk-user-row {
+            margin-bottom: 8px;
+        }
+
+        .lk-label {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .lk-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .lk-role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .lk-role-user {
+            background: #e9f5ff;
+            color: #0056A6;
+        }
+
+        .lk-role-admin {
+            background: #ffe9e9;
+            color: #c82333;
+        }
+
+        .lk-logout {
+            margin-top: 18px;
+        }
+
+        .lk-logout-btn {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background .2s ease;
+        }
+
+        .lk-logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* Блок корзины */
+        .lk-cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .lk-cart-count {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .lk-cart-items {
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fdfdfd;
+        }
+
+        .cart-item-image {
+            width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 16px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .cart-item-price {
+            color: #ff0000;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .quantity-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .quantity-value {
+            min-width: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .remove-item {
+            border: none;
+            background: #dc3545;
+            color: #fff;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+
+        .cart-empty {
+            text-align: center;
+            color: #777;
+            padding: 25px 10px;
+        }
+
+        .lk-cart-total {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lk-cart-total-label {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .lk-cart-total-price {
+            font-size: 20px;
+            color: #ff0000;
+            font-weight: 700;
+        }
+
+        .lk-cart-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .clear-cart-btn,
+        .checkout-btn {
+            border-radius: 6px;
+            padding: 9px 14px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .clear-cart-btn {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .checkout-btn {
+            background: #28a745;
+            color: #fff;
+            flex: 1;
+        }
+
+        .clear-cart-btn:hover {
+            background: #545b62;
+        }
+
+        .checkout-btn:hover {
+            background: #218838;
+        }
+
+        .lk-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="lk-wrapper">
+    <div class="lk-header">
+        <div class="lk-title">Личный кабинет</div>
+        <div class="lk-links">
+            <a href="index.html" class="lk-btn">На главную</a>
+            <a href="catalog.html" class="lk-btn">В каталог</a>
+        </div>
+    </div>
+
+    <div class="lk-layout">
+        <!-- Блок информации о пользователе -->
+        <div class="lk-card">
+            <div class="lk-card-title">Профиль</div>
+
+            <div class="lk-user-row">
+                <div class="lk-label">Имя пользователя</div>
+                <div class="lk-value" id="lkUsername">—</div>
+            </div>
+
+            <div class="lk-user-row">
+                <div class="lk-label">Email</div>
+                <div class="lk-value" id="lkEmail">—</div>
+            </div>
+
+            <div class="lk-user-row">
+                <div class="lk-label">Роль</div>
+                <div class="lk-value">
+                    <span id="lkRole" class="lk-role-badge lk-role-user">Пользователь</span>
+                </div>
+            </div>
+
+            <div class="lk-logout">
+                <button class="lk-logout-btn" id="logoutBtn">Выйти из аккаунта</button>
+                <div class="lk-note">После выхода корзина останется привязанной к вашему аккаунту, но будет недоступна гостям.</div>
+            </div>
+        </div>
+
+        <!-- Блок корзины -->
+        <div class="lk-card">
+            <div class="lk-cart-header">
+                <div class="lk-card-title">Моя корзина</div>
+                <div class="lk-cart-count">
+                    Товаров: <span id="lkCartItemsCount">0</span>
+                </div>
+            </div>
+
+            <div id="lkCartItems" class="lk-cart-items"></div>
+
+            <div id="lkCartEmpty" class="cart-empty" style="display:none;">
+                <p>Корзина пуста</p>
+                <p style="font-size:13px;">Добавьте автомобили в каталоге.</p>
+            </div>
+
+            <div id="lkCartSummary" style="display:none;">
+                <div class="lk-cart-total">
+                    <div class="lk-cart-total-label">Итого:</div>
+                    <div class="lk-cart-total-price" id="lkCartTotalPrice">0 ₽</div>
+                </div>
+                <div class="lk-cart-actions">
+                    <button class="clear-cart-btn" id="lkClearCartBtn">Очистить корзину</button>
+                    <button class="checkout-btn" id="lkCheckoutBtn">Оформить заявку</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8080';
+
+    // ----- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И КОРЗИНА -----
+    function getCartStorageKey() {
+        const userId = localStorage.getItem('currentUserId');
+        return userId ? `cart_${userId}` : null;
+    }
+
+    const CART_STORAGE_KEY = getCartStorageKey();
+    const isLoggedIn = !!CART_STORAGE_KEY;
+
+    let cart = [];
+    if (isLoggedIn) {
+        cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || [];
+    }
+
+    // Элементы профиля
+    const lkUsernameEl = document.getElementById('lkUsername');
+    const lkEmailEl = document.getElementById('lkEmail');
+    const lkRoleEl = document.getElementById('lkRole');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Элементы корзины
+    const lkCartItemsContainer = document.getElementById('lkCartItems');
+    const lkCartEmpty = document.getElementById('lkCartEmpty');
+    const lkCartSummary = document.getElementById('lkCartSummary');
+    const lkCartItemsCount = document.getElementById('lkCartItemsCount');
+    const lkCartTotalPrice = document.getElementById('lkCartTotalPrice');
+    const lkClearCartBtn = document.getElementById('lkClearCartBtn');
+    const lkCheckoutBtn = document.getElementById('lkCheckoutBtn');
+
+    // Инициализация профиля
+    function initProfile() {
+        const username = localStorage.getItem('currentUsername');
+        const email = localStorage.getItem('currentUserEmail');
+        const isAdmin = localStorage.getItem('currentUserIsAdmin') === 'true';
+
+        if (!username) {
+            alert('Вы не авторизованы. Перенаправление в каталог.');
+            window.location.href = 'catalog.html';
+            return;
+        }
+
+        lkUsernameEl.textContent = username;
+        lkEmailEl.textContent = email || 'не указан';
+
+        if (isAdmin) {
+            lkRoleEl.textContent = 'Администратор';
+            lkRoleEl.classList.remove('lk-role-user');
+            lkRoleEl.classList.add('lk-role-admin');
+        } else {
+            lkRoleEl.textContent = 'Пользователь';
+        }
+
+        renderCart();
+
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('Выйти из аккаунта?')) {
+                localStorage.removeItem('currentUserId');
+                localStorage.removeItem('currentUsername');
+                localStorage.removeItem('currentUserEmail');
+                localStorage.removeItem('currentUserIsAdmin');
+                window.location.href = 'index.html';
+            }
+        });
+
+        lkClearCartBtn.addEventListener('click', clearCart);
+        lkCheckoutBtn.addEventListener('click', checkout);
+    }
+
+    // --- КОРЗИНА ---
+
+    function saveCart() {
+        if (!CART_STORAGE_KEY) return;
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    }
+
+    function formatPrice(price) {
+        return new Intl.NumberFormat('ru-RU', {
+            style: 'currency',
+            currency: 'RUB',
+            minimumFractionDigits: 0
+        }).format(price);
+    }
+
+    function calculateTotal() {
+        return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    }
+
+    function renderCart() {
+        lkCartItemsContainer.innerHTML = '';
+
+        if (!isLoggedIn) {
+            lkCartEmpty.style.display = 'block';
+            lkCartEmpty.innerHTML = '<p>Вы не авторизованы</p><p style="font-size:13px;">Войдите, чтобы увидеть вашу корзину.</p>';
+            lkCartSummary.style.display = 'none';
+            lkCartItemsCount.textContent = '0';
+            return;
+        }
+
+        if (cart.length === 0) {
+            lkCartEmpty.style.display = 'block';
+            lkCartSummary.style.display = 'none';
+            lkCartItemsCount.textContent = '0';
+            return;
+        }
+
+        lkCartEmpty.style.display = 'none';
+        lkCartSummary.style.display = 'block';
+
+        cart.forEach(item => {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            cartItem.innerHTML = `
+                <img src="${item.image}" alt="${item.title}" class="cart-item-image">
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.title}</div>
+                    <div class="cart-item-price">${formatPrice(item.price)}</div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn" data-id="${item.id}" data-delta="-1">−</button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn" data-id="${item.id}" data-delta="1">+</button>
+                    </div>
+                </div>
+                <button class="remove-item" data-id="${item.id}">Удалить</button>
+            `;
+            lkCartItemsContainer.appendChild(cartItem);
+        });
+
+        // Обработчики +/− и удалить
+        lkCartItemsContainer.addEventListener('click', function (e) {
+            const qBtn = e.target.closest('.quantity-btn');
+            const removeBtn = e.target.closest('.remove-item');
+
+            if (qBtn) {
+                const id = qBtn.dataset.id;
+                const delta = parseInt(qBtn.dataset.delta);
+                changeQuantity(id, delta);
+            }
+
+            if (removeBtn) {
+                const id = removeBtn.dataset.id;
+                removeFromCart(id);
+            }
+        }, { once: true });
+
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        lkCartItemsCount.textContent = totalItems.toString();
+        lkCartTotalPrice.textContent = formatPrice(calculateTotal());
+    }
+
+    function changeQuantity(id, delta) {
+        const item = cart.find(i => i.id === id);
+        if (!item) return;
+
+        item.quantity += delta;
+
+        if (item.quantity <= 0) {
+            if (confirm('Удалить этот автомобиль из корзины?')) {
+                removeFromCart(id);
+                return;
+            } else {
+                item.quantity = 1;
+            }
+        }
+
+        saveCart();
+        renderCart();
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(item => item.id !== id);
+        saveCart();
+        renderCart();
+    }
+
+    function clearCart() {
+        if (cart.length === 0) return;
+        if (confirm('Очистить корзину полностью?')) {
+            cart = [];
+            saveCart();
+            renderCart();
+        }
+    }
+
+    function checkout() {
+        if (cart.length === 0) {
+            alert('Корзина пуста!');
+            return;
+        }
+
+        let message = 'Заявка на автомобили:\n\n';
+        cart.forEach(item => {
+            message += `${item.title} - ${formatPrice(item.price)} (${item.quantity} шт.)\n`;
+        });
+
+        const total = calculateTotal();
+        message += `\nОбщая стоимость: ${formatPrice(total)}`;
+        message += '\n\nПожалуйста, оставьте ваши контактные данные для связи:';
+
+        const name = prompt('Введите ваше имя:');
+        if (!name) return;
+
+        const phone = prompt('Введите ваш номер телефона:');
+        if (!phone) return;
+
+        const email = prompt('Введите ваш email (необязательно):');
+
+        console.log('Заявка из ЛК:', {
+            name, phone, email, cart, total
+        });
+
+        alert(`Спасибо за заявку, ${name}! Наш менеджер свяжется с вами по телефону ${phone}.`);
+
+        cart = [];
+        saveCart();
+        renderCart();
+    }
+
+    document.addEventListener('DOMContentLoaded', initProfile);
+</script>
+</body>
+</html>

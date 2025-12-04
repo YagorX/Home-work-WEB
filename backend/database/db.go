@@ -49,12 +49,30 @@ func InitDB() error {
 		return err
 	}
 
+	if err := createAdminsTable(); err != nil {
+		return err
+	}
+
 	// Заполняем данными автомобилей
 	err = SeedCarsData()
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func createAdminsTable() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS admins (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT UNIQUE NOT NULL
+	)`
+	_, err := DB.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creating admins table: %v", err)
+	}
+	log.Println("Admins table created or already exists")
 	return nil
 }
 
@@ -65,7 +83,8 @@ func createUsersTable() error {
 		username TEXT UNIQUE NOT NULL,
 		email TEXT UNIQUE NOT NULL,
 		password TEXT NOT NULL,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		IsAdmin bool DEFAULT FALSE
 	)
 	`
 
@@ -87,18 +106,26 @@ func NewUserRepository() *UserRepository {
 	return &UserRepository{db: DB}
 }
 
-func (r *UserRepository) CreateUser(username, email, password string) error {
-	query := `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`
-	_, err := r.db.Exec(query, username, email, password)
+func (r *UserRepository) CreateUser(username, email, password string, isAdmin bool) error {
+	query := `INSERT INTO users (username, email, password, IsAdmin) VALUES (?, ?, ?, ?)`
+
+	adminValue := 0
+	if isAdmin {
+		adminValue = 1
+	}
+
+	_, err := r.db.Exec(query, username, email, password, adminValue)
 	return err
 }
 
 func (r *UserRepository) GetUserByUsername(username string) (*models.User, error) {
-	query := `SELECT id, username, email, password, created_at FROM users WHERE username = ?`
+	query := `SELECT id, username, email, password, IsAdmin, created_at FROM users WHERE username = ?`
 	row := r.db.QueryRow(query, username)
 
 	var user models.User
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt)
+	var isAdminInt int
+
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &isAdminInt, &user.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -106,6 +133,7 @@ func (r *UserRepository) GetUserByUsername(username string) (*models.User, error
 		return nil, err
 	}
 
+	user.IsAdmin = isAdminInt == 1
 	return &user, nil
 }
 

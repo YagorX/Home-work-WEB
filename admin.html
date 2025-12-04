@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админка каталога</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container { max-width: 1100px; margin: 40px auto; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; font-size: 14px; }
+        th { background:#f4f4f4; }
+        .form-row { margin-bottom: 10px; }
+        .form-row label { display:block; font-size: 13px; margin-bottom: 4px; }
+        .form-row input, .form-row textarea, .form-row select {
+            width:100%; padding:6px; font-size:14px;
+        }
+        .btn { padding:6px 12px; margin-right:6px; cursor:pointer; }
+        .btn-delete { background:#e74c3c; color:#fff; border:none; }
+        .btn-save   { background:#2ecc71; color:#fff; border:none; }
+    </style>
+</head>
+<body>
+<div class="admin-container">
+    <h1>Админка каталога Renault</h1>
+    <p>Доступ только для авторизованных администраторов.</p>
+
+    <h2>Товары (автомобили)</h2>
+    <table id="carsTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Категория</th>
+            <th>Цена</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2 id="formTitle">Добавить автомобиль</h2>
+    <form id="carForm">
+        <div class="form-row">
+            <label for="carId">ID (латиница, без пробелов) *</label>
+            <input type="text" id="carId" required>
+        </div>
+        <div class="form-row">
+            <label for="carTitle">Название *</label>
+            <input type="text" id="carTitle" required>
+        </div>
+        <div class="form-row">
+            <label for="carCategory">Категория</label>
+            <select id="carCategory">
+                <option value="Легковые">Легковые</option>
+                <option value="Кроссоверы">Кроссоверы</option>
+                <option value="Коммерческие">Коммерческие</option>
+                <option value="Электромобили">Электромобили</option>
+                <option value="Гибриды">Гибриды</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="carPrice">Цена (base_price)</label>
+            <input type="number" id="carPrice" min="0" step="1000">
+        </div>
+        <div class="form-row">
+            <label for="carImage">Главная картинка (URL)</label>
+            <input type="text" id="carImage">
+        </div>
+        <div class="form-row">
+            <label for="carDescription">Описание</label>
+            <textarea id="carDescription" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+            <label for="carFeatures">Особенности (по одной на строку)</label>
+            <textarea id="carFeatures" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+            <label for="carImages">Доп. картинки (по одной ссылке на строку)</label>
+            <textarea id="carImages" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-save">Сохранить</button>
+        <button type="button" class="btn" id="resetFormBtn">Новый</button>
+    </form>
+</div>
+
+<script>
+    // Проверяем при заходе на /admin, что это залогиненный админ
+    document.addEventListener('DOMContentLoaded', () => {
+    const token   = localStorage.getItem('auth_token');
+    const isAdmin = localStorage.getItem('is_admin') === 'true';
+
+    if (!token || !isAdmin) {
+        document.body.innerHTML = `
+            <div style="max-width:600px;margin:80px auto;font-family:sans-serif;text-align:center">
+                <h1>403 Доступ запрещён</h1>
+                <p>Только администратор может просматривать эту страницу.</p>
+                <p><a href="/" style="color:#007bff;text-decoration:none;">Вернуться на главную</a></p>
+            </div>
+        `;
+        return;
+    }
+
+    // если сюда дошли — запускаем код админки
+    initAdminPanel(); // или просто вызывай свои функции loadCars() и т.д.
+});
+
+    function initAdminPanel() {
+        const API_BASE = 'http://localhost:8080';     // как в script.js, только без /api
+        const API_URL  = API_BASE + '/api';
+
+        function getToken() {
+            return localStorage.getItem('auth_token');
+        }
+
+        async function loadCars() {
+            const res = await fetch(API_URL + '/cars');
+            if (!res.ok) {
+                alert('Ошибка загрузки автомобилей: ' + res.status);
+                return;
+            }
+
+            const cars = await res.json();
+            const tbody = document.querySelector('#carsTable tbody');
+            tbody.innerHTML = '';
+
+            cars.forEach(car => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${car.id}</td>
+                    <td>${car.title}</td>
+                    <td>${car.category || ''}</td>
+                    <td>${car.price || ''}</td>
+                    <td>
+                      <button class="btn" data-edit="${car.id}">Редактировать</button>
+                      <button class="btn btn-delete" data-del="${car.id}">Удалить</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function formToCar() {
+            const features = document.getElementById('carFeatures').value
+                .split('\n').map(s => s.trim()).filter(Boolean);
+            const images = document.getElementById('carImages').value
+                .split('\n').map(s => s.trim()).filter(Boolean);
+
+            return {
+                id:          document.getElementById('carId').value.trim(),
+                title:       document.getElementById('carTitle').value.trim(),
+                model:       document.getElementById('carTitle').value.trim(),
+                category:    document.getElementById('carCategory').value,
+                price:       parseInt(document.getElementById('carPrice').value || '0', 10),
+                image:       document.getElementById('carImage').value.trim(),
+                description: document.getElementById('carDescription').value.trim(),
+                features,
+                images
+            };
+        }
+
+        function fillForm(car) {
+            document.getElementById('formTitle').textContent = 'Редактировать автомобиль: ' + car.id;
+            document.getElementById('carId').value          = car.id;
+            document.getElementById('carTitle').value       = car.title;
+            document.getElementById('carCategory').value    = car.category || 'Легковые';
+            document.getElementById('carPrice').value       = car.price || '';
+            document.getElementById('carImage').value       = car.image || '';
+            document.getElementById('carDescription').value = car.description || '';
+            document.getElementById('carFeatures').value    = (car.features || []).join('\n');
+            document.getElementById('carImages').value      = (car.images || []).join('\n');
+        }
+
+        // Сабмит формы: если ID уже есть в БД – делаем PUT, иначе POST
+        document.getElementById('carForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const car = formToCar();
+
+            const token = getToken();
+            if (!token) {
+                alert('Нет токена авторизации');
+                return;
+            }
+
+            // сначала проверим, существует ли такой id
+            let method = 'POST';
+            let url    = API_URL + '/admin/cars';
+
+            try {
+                const check = await fetch(API_URL + '/cars/' + encodeURIComponent(car.id));
+                if (check.ok) {
+                    method = 'PUT';
+                    url    = API_URL + '/admin/cars/' + encodeURIComponent(car.id);
+                }
+            } catch (e) {
+                console.warn('check car error', e);
+            }
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(car)
+            });
+
+            if (!res.ok) {
+                const text = await res.text();
+                alert('Ошибка сохранения: ' + res.status + ' ' + text);
+                return;
+            }
+
+            await loadCars();
+            alert('Сохранено');
+        });
+
+        // Клики по таблице – редактирование/удаление
+        document.querySelector('#carsTable').addEventListener('click', async (e) => {
+            const editId = e.target.dataset.edit;
+            const delId  = e.target.dataset.del;
+
+            if (editId) {
+                const res = await fetch(API_URL + '/cars/' + encodeURIComponent(editId));
+                if (!res.ok) {
+                    alert('Не удалось загрузить автомобиль: ' + res.status);
+                    return;
+                }
+                const car = await res.json();
+                fillForm(car);
+            }
+
+            if (delId) {
+                if (!confirm('Удалить автомобиль ' + delId + '?')) return;
+
+                const token = getToken();
+                if (!token) {
+                    alert('Нет токена авторизации');
+                    return;
+                }
+
+                const res = await fetch(
+                    API_URL + '/admin/cars/' + encodeURIComponent(delId),
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    }
+                );
+                if (!res.ok) {
+                    const text = await res.text();
+                    alert('Ошибка удаления: ' + res.status + ' ' + text);
+                    return;
+                }
+                await loadCars();
+                alert('Удалено');
+            }
+        });
+
+        document.getElementById('resetFormBtn').addEventListener('click', () => {
+            document.getElementById('formTitle').textContent = 'Добавить автомобиль';
+            document.getElementById('carForm').reset();
+        });
+
+        // старт: подгружаем все автомобили
+        loadCars();
+    }
+</script>
+</body>
+</html>
