@@ -237,19 +237,29 @@
                 <h1>Renault - лучшая машина </h1>
             </div>
             <div class="login-section">
-                <div class="login-form">
-                    <div class="form-row">
-                        <input type="text" placeholder="логин" class="login-input">
-                    </div>
-                    <div class="form-row">
-                        <input type="password" placeholder="пароль" class="password-input">
-                    </div>
-                    <div class="form-row">
-                        <input type="submit" value="войти" class="submit-btn">
-                        &nbsp;<a href="#" class="register-link" id="registerLink">регистрация</a>
-                    </div>
-                </div>
-            </div>
+    <!-- Блок для НЕавторизованного пользователя -->
+    <div class="login-form" id="loginFormBlock">
+        <div class="form-row">
+            <input type="text" placeholder="логин" class="login-input" id="loginHeaderUsername">
+        </div>
+        <div class="form-row">
+            <input type="password" placeholder="пароль" class="password-input" id="loginHeaderPassword">
+        </div>
+        <div class="form-row">
+            <input type="submit" value="войти" class="submit-btn" id="loginHeaderSubmit">
+            &nbsp;<a href="#" class="register-link" id="registerLink">регистрация</a>
+        </div>
+    </div>
+
+    <!-- Блок для АВТОРИЗОВАННОГО пользователя -->
+    <div class="user-info" id="userInfoBlock" style="display: none;">
+        <span class="user-greeting">
+            Привет,
+            <a href="profile.html" id="userNameLink" style="color:#3498db; text-decoration:none;"></a>
+        </span>
+    </div>
+</div>
+
         </div>
     </header>
 
@@ -497,6 +507,34 @@
             
     </footer>
 
-    <script src="js/script.js"></script>
+<script src="js/script.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.querySelector('.flex-container .search-input');
+    const searchBtn   = document.querySelector('.flex-container .search-output');
+
+    if (!searchInput || !searchBtn) return;
+
+    function goToCatalog() {
+        const term = searchInput.value.trim();
+
+        if (!term) {
+            // просто открываем каталог из той же папки
+            window.location.href = 'index5.html';
+            return;
+        }
+
+        // формируем относительный URL
+        window.location.href = 'index5.html?q=' + encodeURIComponent(term);
+    }
+
+    searchBtn.addEventListener('click', goToCatalog);
+    searchInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') goToCatalog();
+    });
+});
+</script>
+
 </body>
 </html>

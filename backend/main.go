@@ -46,6 +46,24 @@ type Spec struct {
 // отдельная БД под каталог автомобилей
 var carDB *sql.DB
 
+func CORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-User-Id")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// preflight OPTIONS request — отвечаем сразу
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	// ---------- БД пользователей / auth (твоя старая логика) ----------
 	if err := database.InitDB(); err != nil {
@@ -114,11 +132,22 @@ func main() {
 	admin.HandleFunc("/cars/{id}", updateCarHandler).Methods("PUT")
 	admin.HandleFunc("/cars/{id}", deleteCarHandler).Methods("DELETE")
 
+	cartHandler := handlers.NewCartHandler()
+
+	// /api/cart (список, добавление, очистка)
+	api.HandleFunc("/cart", cartHandler.GetCart).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/cart", cartHandler.AddToCart).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/cart", cartHandler.Clear).Methods(http.MethodDelete, http.MethodOptions)
+
+	// /api/cart/{id} (обновление количества, удаление позиции)
+	api.HandleFunc("/cart/{id}", cartHandler.UpdateQuantity).Methods(http.MethodPatch, http.MethodOptions)
+	api.HandleFunc("/cart/{id}", cartHandler.DeleteItem).Methods(http.MethodDelete, http.MethodOptions)
+
 	// ---------- CORS ----------
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // в проде лучше ограничить
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Requested-With"},
+		AllowedOrigins:   []string{"*"}, // пока можно так, потом ограничишь
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Requested-With", "X-User-Id"},
 		ExposedHeaders:   []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           86400,
@@ -142,6 +171,7 @@ func main() {
 	log.Println("  - Запрещены простые пароли и последовательности")
 
 	handler := corsHandler.Handler(router)
+
 	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

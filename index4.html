@@ -415,7 +415,33 @@
             
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="js/script.js"> </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.querySelector('.flex-container .search-input');
+    const searchBtn   = document.querySelector('.flex-container .search-output');
+
+    if (!searchInput || !searchBtn) return;
+
+    function goToCatalog() {
+        const term = searchInput.value.trim();
+
+        if (!term) {
+            // просто открываем каталог из той же папки
+            window.location.href = 'index5.html';
+            return;
+        }
+
+        // формируем относительный URL
+        window.location.href = 'index5.html?q=' + encodeURIComponent(term);
+    }
+
+    searchBtn.addEventListener('click', goToCatalog);
+    searchInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') goToCatalog();
+    });
+});
+    </script>
 
 </body>
 </html>

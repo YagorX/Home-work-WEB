@@ -53,12 +53,32 @@ func InitDB() error {
 		return err
 	}
 
+	if err := createCartTables(); err != nil {
+		return err
+	}
+
 	// Заполняем данными автомобилей
 	err = SeedCarsData()
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func createCartTables() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS cart_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    car_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1
+)`
+	_, err := DB.Exec(query)
+	if err != nil {
+		return fmt.Errorf("error creating admins table: %v", err)
+	}
+	log.Println("Admins table created or already exists")
 	return nil
 }
 

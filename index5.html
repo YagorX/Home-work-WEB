@@ -892,8 +892,8 @@
 </html>
 
 <script>
-    // ------------- КОРЗИНА -------------
-    // Определяем ключ для корзины в зависимости от пользователя
+//     // ------------- КОРЗИНА -------------
+//     // Определяем ключ для корзины в зависимости от пользователя
     function getCartStorageKey() {
     const userId = localStorage.getItem('currentUserId');
     // если пользователь не залогинен – ключа нет
@@ -923,7 +923,7 @@
     const cartCloseBtn = document.querySelector('.cart-close');
     const API_BASE = 'http://localhost:8080';
 
-    // ----- ГАЛЕРЕЯ ФОТО -----
+//     // ----- ГАЛЕРЕЯ ФОТО -----
     let currentCarId = null;
     let currentGallery = [];
     let currentGalleryIndex = 0;
@@ -983,25 +983,8 @@
         updateButtonState(button, true);
 }
 
-function initCategoryFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const categoryFromUrl = params.get('category');
 
-    if (!categoryFromUrl) return;
 
-    const btn = Array.from(document.querySelectorAll('.category-btn'))
-        .find(b => b.dataset.category === categoryFromUrl);
-
-    if (!btn) return;
-
-    setActiveCategory(categoryFromUrl);
-    performSearch();
-
-    const section = document.getElementById(categoryFromUrl);
-    if (section) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
 
 
     function updateButtonState(button, added) {
@@ -1027,6 +1010,56 @@ function initCategoryFromUrl() {
         renderCart();
         updateCartButtons();
     }
+
+// Загрузка корзины для страницы каталога
+async function loadCartFromServer() {
+    // если пользователь не авторизован – корзину не грузим
+    if (!isLoggedIn) {
+        cart = [];
+        updateCartCount();
+        updateCartButtons();
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/api/cart`, {
+            headers: {
+                'X-User-Id': currentUserId
+            }
+        });
+
+        if (!res.ok) {
+            console.error('Ошибка загрузки корзины:', res.status);
+            cart = [];
+            updateCartCount();
+            updateCartButtons();
+            return;
+        }
+
+        const data = await res.json();
+        cart = Array.isArray(data) ? data : [];
+
+        // Ожидаемый формат элемента корзины:
+        // {
+        //   id: number/строка  – id записи корзины
+        //   carId: string      – id автомобиля
+        //   title: string
+        //   price: number
+        //   image: string
+        //   quantity: number
+        // }
+
+        renderCart();       // отрисовать модалку (если её откроют)
+        updateCartCount();  // обновить счётчик в шапке
+        updateCartButtons();// подсветить кнопки "В корзине"
+    } catch (e) {
+        console.error('loadCartFromServer error:', e);
+        cart = [];
+        updateCartCount();
+        updateCartButtons();
+    }
+}
+
 
     function clearCart() {
         if (cart.length === 0) return;
@@ -1231,6 +1264,7 @@ function initCategoryFromUrl() {
         cartModal.style.display = 'none';
     }
 
+
     // ------------- ПОИСК + ФИЛЬТР -------------
 
     const searchInput = document.getElementById('searchInput');
@@ -1296,6 +1330,38 @@ function initCategoryFromUrl() {
             }, 300);
         });
     }
+
+    function initCategoryFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const categoryFromUrl = params.get('category');
+    const searchFromUrl   = params.get('q');
+
+    // Если из адреса передали строку поиска – подставим её в input
+    if (searchFromUrl && typeof searchInput !== 'undefined' && searchInput) {
+        searchInput.value = searchFromUrl;
+    }
+
+    // Если из адреса передали категорию – активируем её
+    if (categoryFromUrl) {
+        const btn = Array.from(document.querySelectorAll('.category-btn'))
+            .find(b => b.dataset.category === categoryFromUrl);
+
+        if (btn) {
+            setActiveCategory(categoryFromUrl);
+        }
+    }
+
+    // В любом случае после установки параметров делаем поиск
+    performSearch();
+
+    // Если есть категория – скроллим к нужному разделу
+    if (categoryFromUrl) {
+        const section = document.getElementById(categoryFromUrl);
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+}
 
     function setActiveCategory(category) {
         activeCategory = category;

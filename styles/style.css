@@ -1134,3 +1134,49 @@ body.modal-open {
     color: #ff0000;
     text-decoration: underline;
 }
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+}
+
+.user-greeting {
+    font-size: 14px;
+}
+
+.user-name-link {
+    color: #ffd700;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.user-name-link:hover {
+    text-decoration: underline;
+}
+
+.logout-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 13px;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+}
+
+.admin-link {
+    color: #ffeb3b;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.admin-link:hover {
+    text-decoration: underline;
+}

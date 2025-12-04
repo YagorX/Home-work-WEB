@@ -927,69 +927,57 @@ function isUserLoggedIn() {
 }
 
 
-// Функция обновления интерфейса после входа
-function updateUIAfterLogin(username) {
-    const loginSection = document.querySelector('.login-section');
-    if (!loginSection) {
-        console.error('Login section not found');
-        return;
+function updateUIAfterLogin(username, email, isAdmin) {
+    const headerLoginForm = document.querySelector('.login-form');
+    const headerContainer = document.querySelector('.login-section');
+
+    if (headerLoginForm && headerContainer) {
+        headerContainer.innerHTML = `
+            <div class="user-info">
+                <span class="user-greeting">
+                    Добро пожаловать, 
+                    <a href="profile.html" class="user-name-link" id="userProfileLink">
+                        ${username}
+                    </a>!
+                </span>
+                ${isAdmin ? '<a href="admin.html" class="admin-link">Панель администратора</a>' : ''}
+                <button class="logout-btn" id="logoutBtnHeader">Выйти</button>
+            </div>
+        `;
+
+        const logoutBtnHeader = document.getElementById('logoutBtnHeader');
+        if (logoutBtnHeader) {
+            logoutBtnHeader.addEventListener('click', logoutUser);
+        }
     }
-    
-    console.log('Updating UI for user:', username);
-    
-    // Проверяем, есть ли уже форма приветствия
-    if (loginSection.querySelector('.welcome-section')) {
-        console.log('Welcome section already exists');
-        return;
-    }
-    
-    // Создаем блок приветствия
-    const welcomeDiv = document.createElement('div');
-    welcomeDiv.className = 'welcome-section';
-    welcomeDiv.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <p style="margin: 0 0 5px 0; color: white; font-size: 14px;">
-                👋 Привет, <strong style="color: #ffd700;">${username}</strong>!
-            </p>
-            <button id="logoutBtn" style="
-                background: linear-gradient(135deg, #f44336, #d32f2f);
-                color: white;
-                border: none;
-                padding: 6px 16px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: bold;
-                transition: all 0.3s;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                margin-top: 5px;
-            ">
-                🚪 Выйти
-            </button>
-        </div>
-    `;
-    
-    // Заменяем форму входа
-    loginSection.innerHTML = '';
-    loginSection.appendChild(welcomeDiv);
-    
-    // Добавляем обработчик для кнопки выхода
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('mouseover', function() {
-            this.style.transform = 'translateY(-2px)';
-            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-        });
-        
-        logoutBtn.addEventListener('mouseout', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-        });
-        
-        logoutBtn.addEventListener('click', logout);
-        console.log('Logout button added');
+
+    const logoutBtnMain = document.getElementById('logoutBtnMain');
+    if (logoutBtnMain) {
+        logoutBtnMain.style.display = 'inline-block';
+        logoutBtnMain.addEventListener('click', logoutUser);
     }
 }
+
+// Глобальная функция выхода, доступна на всех страницах
+function logoutUser() {
+    // чистим данные авторизации
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('email');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('is_admin');
+
+    // если используешь userId для корзины
+    const uid = localStorage.getItem('currentUserId');
+    if (uid) {
+        localStorage.removeItem('cart_' + uid);
+        localStorage.removeItem('currentUserId');
+    }
+
+    // переходим на главную
+    window.location.href = 'index.html';
+}
+
 
 function logout() {
     showNotification('👋 До свидания! Вы вышли из системы.', 'info');

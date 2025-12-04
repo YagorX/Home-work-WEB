@@ -176,6 +176,30 @@ func (r *CarRepository) GetAllCars() ([]models.Car, error) {
 	return cars, nil
 }
 
+func (r *CarRepository) GetCarByID(id int) (*models.Car, error) {
+	row := r.db.QueryRow(`
+        SELECT id, title, image, price, description, category
+        FROM cars
+        WHERE id = ?`,
+		id,
+	)
+
+	var car models.Car
+	err := row.Scan(
+		&car.ID,
+		&car.Title,
+		&car.Image,
+		&car.Price,
+		&car.Description,
+		&car.Category,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &car, nil
+}
+
 // GetCarsByCategory возвращает автомобили по категории
 func (r *CarRepository) GetCarsByCategory(category string) ([]models.Car, error) {
 	query := `SELECT id, model, title, price, category, image, description, created_at 
