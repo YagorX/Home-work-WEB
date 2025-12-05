@@ -1,151 +1,253 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
+
 	"renault-backend/database"
-	"strconv"
-	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 type CartHandler struct {
-	cartRepo *database.CartRepository
-	carRepo  *database.CarRepository
+	db *sql.DB
 }
 
 func NewCartHandler() *CartHandler {
-	return &CartHandler{
-		cartRepo: database.NewCartRepository(),
-		carRepo:  database.NewCarRepository(),
+	h := &CartHandler{db: database.DB}
+	if err := h.initCartTable(); err != nil {
+		fmt.Println("initCartTable error:", err)
 	}
+	return h
 }
 
-// =============== УТИЛИТА: получить userID из заголовка ===============
-func getUserID(r *http.Request) (int, error) {
-	header := r.Header.Get("X-User-Id")
-	return strconv.Atoi(header)
+// создаём таблицу, если её ещё нет
+func (h *CartHandler) initCartTable() error {
+	_, err := h.db.Exec(`
+        CREATE TABLE IF NOT EXISTS cart_items (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id   TEXT    NOT NULL,
+            car_id    TEXT    NOT NULL,
+            quantity  INTEGER NOT NULL DEFAULT 1,
+            UNIQUE(user_id, car_id)
+        );
+    `)
+	return err
 }
 
-// ========================= GET /api/cart =============================
-func (h *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	userID, err := getUserID(r)
-	if err != nil {
-		http.Error(w, "NO USER ID", http.StatusUnauthorized)
-		return
-	}
-
-	items, err := h.cartRepo.GetCart(userID)
-	if err != nil {
-		http.Error(w, "DB ERROR", http.StatusInternalServerError)
-		return
-	}
-
-	// ДЕЛАЕМ НЕ nil, а пустой слайс
-	response := make([]database.CartItemResponse, 0)
-
-	for _, item := range items {
-		car, err := h.carRepo.GetCarByID(item.CarID)
-		if err != nil {
-			continue
-		}
-
-		response = append(response, database.CartItemResponse{
-			ID:       item.ID,
-			CarID:    car.ID,
-			Title:    car.Title,
-			Image:    car.Image,
-			Price:    car.Price,
-			Quantity: item.Quantity,
-		})
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(response) // [] даже если пустой
+type CartItem struct {
+	ID       int    `json:"id"`
+	UserID   string `json:"userId"`
+	CarID    string `json:"carId"`
+	Quantity int    `json:"quantity"`
 }
 
-// ========================= POST /api/cart =============================
-type AddToCartDTO struct {
-	CarID    int `json:"carId"`
+type addToCartRequest struct {
+	CarID    string `json:"carId"`
+	Quantity int    `json:"quantity"`
+}
+
+type updateQuantityRequest struct {
 	Quantity int `json:"quantity"`
 }
 
-func (h *CartHandler) AddToCart(w http.ResponseWriter, r *http.Request) {
-	userID, err := getUserID(r)
-	if err != nil {
-		http.Error(w, "NO USER ID", http.StatusUnauthorized)
+func getUserID(r *http.Request) string {
+	return r.Header.Get("X-User-Id")
+}
+
+// ---------- GET /api/cart ----------
+func (h *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
+	if userID == "" {
+		http.Error(w, "missing X-User-Id", http.StatusBadRequest)
 		return
 	}
 
-	var req AddToCartDTO
-	json.NewDecoder(r.Body).Decode(&req)
+	rows, err := h.db.Query(`
+        SELECT id, user_id, car_id, quantity
+        FROM cart_items
+        WHERE user_id = ?
+        ORDER BY id
+    `, userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("db error GetCart: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
 
+	var items []CartItem
+	for rows.Next() {
+		var it CartItem
+		if err := rows.Scan(&it.ID, &it.UserID, &it.CarID, &it.Quantity); err != nil {
+			http.Error(w, fmt.Sprintf("scan error GetCart: %v", err), http.StatusInternalServerError)
+			return
+		}
+		items = append(items, it)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(w).Encode(items)
+}
+
+// ---------- POST /api/cart ----------
+func (h *CartHandler) AddToCart(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
+	if userID == "" {
+		http.Error(w, "missing X-User-Id", http.StatusBadRequest)
+		return
+	}
+
+	var req addToCartRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("invalid json: %v", err), http.StatusBadRequest)
+		return
+	}
+	if req.CarID == "" {
+		http.Error(w, "carId is required", http.StatusBadRequest)
+		return
+	}
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}
 
-	// Проверяем, есть ли товар в корзине
-	existing, err := h.cartRepo.FindItem(userID, req.CarID)
+	// upsert без ON CONFLICT: сначала UPDATE, если не затронуло строк — INSERT
+	tx, err := h.db.Begin()
 	if err != nil {
-		http.Error(w, "DB ERROR", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("db begin error: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	if existing != nil {
-		// обновляем количество
-		h.cartRepo.UpdateQuantity(existing.ID, existing.Quantity+req.Quantity)
-	} else {
-		// добавляем новую запись
-		h.cartRepo.AddItem(userID, req.CarID, req.Quantity)
+	// пробуем увеличить quantity
+	res, err := tx.Exec(`
+        UPDATE cart_items
+        SET quantity = quantity + ?
+        WHERE user_id = ? AND car_id = ?
+    `, req.Quantity, userID, req.CarID)
+	if err != nil {
+		tx.Rollback()
+		http.Error(w, fmt.Sprintf("db update error: %v", err), http.StatusInternalServerError)
+		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		http.Error(w, fmt.Sprintf("rows affected error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if rowsAffected == 0 {
+		// записи не было — вставляем новую
+		_, err = tx.Exec(`
+            INSERT INTO cart_items (user_id, car_id, quantity)
+            VALUES (?, ?, ?)
+        `, userID, req.CarID, req.Quantity)
+		if err != nil {
+			tx.Rollback()
+			http.Error(w, fmt.Sprintf("db insert error: %v", err), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		http.Error(w, fmt.Sprintf("db commit error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// вернём актуальную корзину
+	h.GetCart(w, r)
 }
 
-// ================= PATCH /api/cart/{id} =============================
-type UpdateQuantityDTO struct {
-	Quantity int `json:"quantity"`
-}
-
+// ---------- PATCH /api/cart/{id} ----------
 func (h *CartHandler) UpdateQuantity(w http.ResponseWriter, r *http.Request) {
-	_, err := getUserID(r)
-	if err != nil {
-		http.Error(w, "NO USER ID", http.StatusUnauthorized)
+	userID := getUserID(r)
+	if userID == "" {
+		http.Error(w, "missing X-User-Id", http.StatusBadRequest)
 		return
 	}
 
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/cart/")
-	itemID, _ := strconv.Atoi(idStr)
+	vars := mux.Vars(r)
+	carID := vars["id"]
+	if carID == "" {
+		http.Error(w, "missing id", http.StatusBadRequest)
+		return
+	}
 
-	var req UpdateQuantityDTO
-	json.NewDecoder(r.Body).Decode(&req)
+	var req updateQuantityRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("invalid json: %v", err), http.StatusBadRequest)
+		return
+	}
 
 	if req.Quantity <= 0 {
-		h.cartRepo.DeleteItem(itemID)
-		w.WriteHeader(http.StatusOK)
-		return
+		_, err := h.db.Exec(`
+            DELETE FROM cart_items
+            WHERE user_id = ? AND car_id = ?
+        `, userID, carID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("db delete error: %v", err), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		_, err := h.db.Exec(`
+            UPDATE cart_items
+            SET quantity = ?
+            WHERE user_id = ? AND car_id = ?
+        `, req.Quantity, userID, carID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("db update error: %v", err), http.StatusInternalServerError)
+			return
+		}
 	}
 
-	h.cartRepo.UpdateQuantity(itemID, req.Quantity)
-	w.WriteHeader(http.StatusOK)
+	h.GetCart(w, r)
 }
 
-// ================= DELETE /api/cart/{id} =============================
+// ---------- DELETE /api/cart/{id} ----------
 func (h *CartHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
-	idStr := strings.TrimPrefix(r.URL.Path, "/api/cart/")
-	itemID, _ := strconv.Atoi(idStr)
-
-	h.cartRepo.DeleteItem(itemID)
-	w.WriteHeader(http.StatusOK)
-}
-
-// ================= DELETE /api/cart =============================
-func (h *CartHandler) Clear(w http.ResponseWriter, r *http.Request) {
-	userID, err := getUserID(r)
-	if err != nil {
-		http.Error(w, "NO USER ID", http.StatusUnauthorized)
+	userID := getUserID(r)
+	if userID == "" {
+		http.Error(w, "missing X-User-Id", http.StatusBadRequest)
 		return
 	}
 
-	h.cartRepo.ClearCart(userID)
-	w.WriteHeader(http.StatusOK)
+	vars := mux.Vars(r)
+	carID := vars["id"]
+	if carID == "" {
+		http.Error(w, "missing id", http.StatusBadRequest)
+		return
+	}
+
+	_, err := h.db.Exec(`
+        DELETE FROM cart_items
+        WHERE user_id = ? AND car_id = ?
+    `, userID, carID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("db delete error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	h.GetCart(w, r)
+}
+
+// ---------- DELETE /api/cart ----------
+func (h *CartHandler) Clear(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
+	if userID == "" {
+		http.Error(w, "missing X-User-Id", http.StatusBadRequest)
+		return
+	}
+
+	_, err := h.db.Exec(`
+        DELETE FROM cart_items
+        WHERE user_id = ?
+    `, userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("db clear error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	h.GetCart(w, r)
 }

@@ -892,17 +892,41 @@
 </html>
 
 <script>
+
+    const currentUserId = localStorage.getItem('currentUserId');
+    const isLoggedIn = !!currentUserId;
+
+
+    // ОДНА нормальная версия getUserId
+    function getUserId() {
+        let id = localStorage.getItem('user_id');
+        if (!id) {
+            id = 'u-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+            localStorage.setItem('user_id', id);
+        }
+        return id;
+    }
+
+    // const currentUserId = getUserId();
+
+    const CART_HEADERS = {
+        'Content-Type': 'application/json',
+        'X-User-Id': currentUserId
+    };
 //     // ------------- КОРЗИНА -------------
 //     // Определяем ключ для корзины в зависимости от пользователя
     function getCartStorageKey() {
-    const userId = localStorage.getItem('currentUserId');
-    // если пользователь не залогинен – ключа нет
-    return userId ? `cart_${userId}` : null;
-    }
+    // привязываем локальное хранилище к user_id, который мы и так генерируем
+    const userId = currentUserId;
+    return `cart_${userId}`;
+}
 
-    // Ключ и флаг авторизации
-    const CART_STORAGE_KEY = getCartStorageKey();
-    const isLoggedIn = !!CART_STORAGE_KEY;
+const CART_STORAGE_KEY = getCartStorageKey();
+// пока считаем, что пользователь "авторизован", раз у него есть user_id
+// const isLoggedIn = true;
+
+
+
 
     // Загружаем корзину только для авторизованного пользователя
     let cart = [];
@@ -954,34 +978,62 @@
         });
     }
 
-    function addToCart(button) {
-        // Гость не может добавлять в корзину
-        if (!isLoggedIn) {
-            alert('Добавление в корзину доступно только авторизованным пользователям. Пожалуйста, войдите в систему.');
-            return;
-        }
-
-        const id = button.dataset.id;
-        const title = button.dataset.title;
-        const price = parseInt(button.dataset.price);
-        const image = button.dataset.image;
-
-        const existingItem = cart.find(item => item.id === id);
-
-        if (existingItem) {
-            existingItem.quantity++;
-        } else {
-            cart.push({
-                id, title, price, image, quantity: 1
-            });
-        }
-
-        saveCart();
-        updateCartCount();
-        renderCart();
-        showNotification(`${title} добавлен в корзину!`);
-        updateButtonState(button, true);
+    function getUserId() {
+    let id = localStorage.getItem('user_id');
+    if (!id) {
+        id = 'u-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('user_id', id);
+    }
+    return id;
 }
+
+    async function addToCart(carId) {
+    // находим кнопку, чтобы взять из неё данные
+    const button = document.querySelector(`.cart-btn[data-id="${carId}"]`);
+    if (!button) {
+        console.error('Не найдена кнопка для carId', carId);
+        return;
+    }
+
+    const title = button.dataset.title;
+    const price = Number(button.dataset.price);
+    const image = button.dataset.image;
+
+    // 1) отправляем на бэкенд (в БД)
+    const res = await fetch(`${API_BASE}/api/cart`, {
+        method: 'POST',
+        headers: CART_HEADERS,
+        body: JSON.stringify({ carId, quantity: 1 })
+    });
+
+    if (!res.ok) {
+        console.error('Ошибка добавления в корзину', res.status);
+        alert('Не удалось добавить в корзину. Попробуйте позже.');
+        return;
+    }
+
+    // 2) обновляем локальную корзину в том формате, который ждёт renderCart
+    const existing = cart.find(item => item.id === carId);
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push({
+            id: carId,
+            title,
+            price,
+            image,
+            quantity: 1
+        });
+    }
+
+    saveCart();
+    updateCartCount();
+    renderCart();
+    updateCartButtons();
+    showNotification('Автомобиль добавлен в корзину!');
+}
+
+
 
 
 
@@ -1003,13 +1055,29 @@
         }
     }
 
-    function removeFromCart(id) {
-        cart = cart.filter(item => item.id !== id);
-        saveCart();
-        updateCartCount();
-        renderCart();
-        updateCartButtons();
+    async function removeFromCart(carId) {
+    const res = await fetch(`http://localhost:8080/api/cart/${encodeURIComponent(carId)}`, {
+        method: 'DELETE',
+        headers: {
+            'X-User-Id': getUserId()
+        }
+    });
+
+    if (!res.ok) {
+        console.error('Ошибка удаления из корзины', res.status);
+        return;
     }
+
+    // НЕ трогаем структуру cart с сервера, просто чистим локально
+    cart = cart.filter(item => item.id === carId ? false : true);
+
+    saveCart();
+    updateCartCount();
+    renderCart();
+    updateCartButtons();
+}
+
+
 
 // Загрузка корзины для страницы каталога
 async function loadCartFromServer() {
@@ -1061,17 +1129,29 @@ async function loadCartFromServer() {
 }
 
 
-    function clearCart() {
-        if (cart.length === 0) return;
-        if (confirm('Вы уверены, что хотите очистить корзину?')) {
-            cart = [];
-            saveCart();
-            updateCartCount();
-            renderCart();
-            updateCartButtons();
-            showNotification('Корзина очищена');
+    async function clearCart() {
+    const res = await fetch('http://localhost:8080/api/cart', {
+        method: 'DELETE',
+        headers: {
+            'X-User-Id': getUserId()
         }
+    });
+
+    if (!res.ok) {
+        console.error('Ошибка очистки корзины', res.status);
+        return;
     }
+
+    // Просто чистим локальную корзину
+    cart = [];
+    saveCart();
+    updateCartCount();
+    renderCart();
+    updateCartButtons();
+}
+
+
+
 
     function checkout() {
         if (cart.length === 0) {
@@ -1135,6 +1215,12 @@ async function loadCartFromServer() {
         }
 }
 
+    async function init() {
+        await loadCars();          // GET /api/cars
+        renderCatalog();           // всё как было
+        await loadCartFromServer();// подтягиваем корзину
+    }
+
 
     function renderCart() {
         cartItemsContainer.innerHTML = '';
@@ -1171,62 +1257,77 @@ async function loadCartFromServer() {
         totalPriceEl.textContent = `${formatPrice(total)}`;
     }
 
-    function changeQuantity(id, delta) {
-        const item = cart.find(i => i.id === id);
-        if (!item) return;
+    async function changeQuantity(carId, delta) {
+    // сначала обновляем на сервере
+    // найдём текущий элемент
+    const item = cart.find(i => i.id === carId);
+    if (!item) return;
 
-        item.quantity += delta;
+    const newQuantity = item.quantity + delta;
 
-        // если стало 0 или меньше – спрашиваем, удалить ли товар
-        if (item.quantity <= 0) {
-            if (confirm('Удалить этот автомобиль из корзины?')) {
-                removeFromCart(id);
-                return;
-            } else {
-                item.quantity = 1;
-            }
-        }
+    const res = await fetch(`http://localhost:8080/api/cart/${encodeURIComponent(carId)}`, {
+        method: 'PATCH',
+        headers: CART_HEADERS,
+        body: JSON.stringify({ quantity: newQuantity })
+    });
 
-        saveCart();
-        updateCartCount();
-        renderCart();
-        updateCartButtons();
+    if (!res.ok) {
+        console.error('Ошибка изменения количества', res.status);
+        return;
     }
 
-    function updateCartButtons() {
-        const buttons = document.querySelectorAll('.cart-btn');
+    // теперь обновляем локально
+    if (newQuantity <= 0) {
+        cart = cart.filter(i => i.id !== carId);
+    } else {
+        item.quantity = newQuantity;
+    }
 
-        // Если пользователь не авторизован – блокируем все кнопки корзины
-        if (!isLoggedIn) {
-            buttons.forEach(button => {
-                button.classList.add('disabled-cart');
-                button.innerHTML = '<span class="cart-icon">🔒</span> Войдите, чтобы добавить';
-                button.onclick = function () {
-                    alert('Добавление в корзину доступно только авторизованным пользователям. Пожалуйста, войдите в систему.');
-                };
-                button.style.cursor = 'pointer';
-            });
-            return;
-        }
-
-        // Для авторизованного пользователя – обычное поведение
-        buttons.forEach(button => {
-            const id = button.dataset.id;
-            const inCart = cart.some(item => item.id === id);
-
-            if (inCart) {
-                button.classList.add('added');
-                button.innerHTML = '<span class="cart-icon">✓</span> В корзине';
-                button.onclick = null;
-                button.style.cursor = 'default';
-            } else {
-                button.classList.remove('added');
-                button.innerHTML = '<span class="cart-icon">🛒</span> Добавить в корзину';
-                button.onclick = function() { addToCart(this); };
-                button.style.cursor = 'pointer';
-            }
-        });
+    saveCart();
+    updateCartCount();
+    renderCart();
+    updateCartButtons();
 }
+
+
+
+    function updateCartButtons() {
+    const buttons = document.querySelectorAll('.cart-btn');
+
+    // Если вдруг снова вернёшь реальную авторизацию – тут можно вернуть блокировку
+    if (!isLoggedIn) {
+        buttons.forEach(button => {
+            button.classList.add('disabled-cart');
+            button.innerHTML = '<span class="cart-icon">🔒</span> Войдите, чтобы добавить';
+            button.onclick = function () {
+                alert('Добавление в корзину доступно только авторизованным пользователям. Пожалуйста, войдите в систему.');
+            };
+            button.style.cursor = 'pointer';
+        });
+        return;
+    }
+
+    // Для авторизованного (в нашем случае — любого) пользователя
+    buttons.forEach(button => {
+        const id = button.dataset.id;
+        const inCart = cart.some(item => item.id === id);
+
+        if (inCart) {
+            button.classList.add('added');
+            button.innerHTML = '<span class="cart-icon">✓</span> В корзине';
+            button.onclick = null;
+            button.style.cursor = 'default';
+        } else {
+            button.classList.remove('added');
+            button.innerHTML = '<span class="cart-icon">🛒</span> Добавить в корзину';
+            button.onclick = function() {
+                addToCart(id); // <- ПЕРЕДАЁМ carId, а не this
+            };
+            button.style.cursor = 'pointer';
+        }
+    });
+}
+
 
 
     function calculateTotal() {

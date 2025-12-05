@@ -134,12 +134,9 @@ func main() {
 
 	cartHandler := handlers.NewCartHandler()
 
-	// /api/cart (список, добавление, очистка)
 	api.HandleFunc("/cart", cartHandler.GetCart).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/cart", cartHandler.AddToCart).Methods(http.MethodPost, http.MethodOptions)
 	api.HandleFunc("/cart", cartHandler.Clear).Methods(http.MethodDelete, http.MethodOptions)
-
-	// /api/cart/{id} (обновление количества, удаление позиции)
 	api.HandleFunc("/cart/{id}", cartHandler.UpdateQuantity).Methods(http.MethodPatch, http.MethodOptions)
 	api.HandleFunc("/cart/{id}", cartHandler.DeleteItem).Methods(http.MethodDelete, http.MethodOptions)
 
