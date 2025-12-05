@@ -1091,9 +1091,7 @@ async function loadCartFromServer() {
 
     try {
         const res = await fetch(`${API_BASE}/api/cart`, {
-            headers: {
-                'X-User-Id': currentUserId
-            }
+            headers: CART_HEADERS
         });
 
         if (!res.ok) {
@@ -1104,22 +1102,39 @@ async function loadCartFromServer() {
             return;
         }
 
-        const data = await res.json();
-        cart = Array.isArray(data) ? data : [];
+        const data = await res.json(); // [{ id, userId, carId, quantity }]
 
-        // Ожидаемый формат элемента корзины:
-        // {
-        //   id: number/строка  – id записи корзины
-        //   carId: string      – id автомобиля
-        //   title: string
-        //   price: number
-        //   image: string
-        //   quantity: number
-        // }
+        // Собираем ПОЛНЫЕ объекты корзины из кнопок карточек
+        const restoredCart = [];
 
-        renderCart();       // отрисовать модалку (если её откроют)
-        updateCartCount();  // обновить счётчик в шапке
-        updateCartButtons();// подсветить кнопки "В корзине"
+        data.forEach(it => {
+            const carId = it.carId;
+
+            // ищем соответствующую кнопку в каталоге
+            const button = document.querySelector(`.cart-btn[data-id="${carId}"]`);
+            if (!button) {
+                // нет такой машины на этой странице – просто пропускаем
+                return;
+            }
+
+            const title = button.dataset.title;
+            const price = Number(button.dataset.price);
+            const image = button.dataset.image;
+
+            restoredCart.push({
+                id: carId,
+                title,
+                price,
+                image,
+                quantity: it.quantity
+            });
+        });
+
+        cart = restoredCart;
+        saveCart();        // синхронизируем localStorage под этого юзера
+        updateCartCount(); // счётчик в шапке
+        renderCart();      // модалка
+        updateCartButtons();// подсветить "В корзине"
     } catch (e) {
         console.error('loadCartFromServer error:', e);
         cart = [];
@@ -1127,6 +1142,7 @@ async function loadCartFromServer() {
         updateCartButtons();
     }
 }
+
 
 
     async function clearCart() {
@@ -1834,10 +1850,11 @@ async function loadCartFromServer() {
 
     // ------------- ИНИЦИАЛИЗАЦИЯ -------------
 
-    document.addEventListener('DOMContentLoaded', function() {
-        initCart();
-        loadCars();
-    });
+    document.addEventListener('DOMContentLoaded', async function() {
+    initCart();           // вешаем обработчики, пустая корзина и т.п.
+    await loadCars();     // ждём, пока подтянется каталог и отрисуются кнопки
+    await loadCartFromServer(); // теперь можно восстановить корзину из БД
+});
 </script>
 
 </body>
