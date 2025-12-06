@@ -38,6 +38,15 @@ type Car struct {
 	Equipment   []Spec   `json:"equipment"`
 }
 
+type Review struct {
+	ID        int    `json:"id"`
+	Email     string `json:"email"`
+	Model     string `json:"model"`
+	Rating    int    `json:"rating"`
+	Text      string `json:"text"`
+	CreatedAt string `json:"created_at"`
+}
+
 type Spec struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -61,6 +70,42 @@ func CORS(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func createReviewHandler(w http.ResponseWriter, r *http.Request) {
+	var rev Review
+	if err := json.NewDecoder(r.Body).Decode(&rev); err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+
+	if rev.Email == "" || rev.Text == "" {
+		http.Error(w, "email and text are required", http.StatusBadRequest)
+		return
+	}
+	if rev.Rating < 0 || rev.Rating > 5 {
+		http.Error(w, "rating must be between 0 and 5", http.StatusBadRequest)
+		return
+	}
+
+	res, err := carDB.Exec(`
+        INSERT INTO reviews (email, model, rating, text)
+        VALUES (?, ?, ?, ?)
+    `, rev.Email, rev.Model, rev.Rating, rev.Text)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+
+	id, _ := res.LastInsertId()
+	rev.ID = int(id)
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]any{
+		"status": "ok",
+		"id":     rev.ID,
 	})
 }
 
@@ -107,6 +152,9 @@ func main() {
 	api.HandleFunc("/login", authHandler.Login).Methods("POST")
 	api.HandleFunc("/validate-password", authHandler.ValidatePassword).Methods("POST")
 	api.HandleFunc("/password-rules", authHandler.PasswordRules).Methods("GET")
+
+	// ОТЗЫВЫ: только сохранение в БД
+	api.HandleFunc("/reviews", createReviewHandler).Methods("POST", "OPTIONS")
 
 	// Отладочные маршруты (как было)
 	api.HandleFunc("/users", authHandler.GetAllUsers).Methods("GET")
@@ -199,6 +247,15 @@ func createCarTables() error {
             car_id TEXT NOT NULL,
             image_path TEXT NOT NULL,
             FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
+        );
+		-- ТАБЛИЦА ОТЗЫВОВ
+        CREATE TABLE IF NOT EXISTS reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            model TEXT,
+            rating INTEGER,
+            text TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
     `)

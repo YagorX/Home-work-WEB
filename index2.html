@@ -254,7 +254,7 @@
     
     <p>Мы ценим ваше мнение! Поделитесь вашим опытом владения автомобилем Renault или задайте интересующие вас вопросы.</p>
     
-    <form class="feedback-form">
+    <form class="feedback-form" id="feedbackForm">
         <div class="form-group">
             <label for="email">Ваш email:</label>
             <input type="email" id="email" name="email" class="form-input" placeholder="example@mail.ru" required>
@@ -389,32 +389,80 @@
     </footer>
     
     <script src="js/script.js"> </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ==== ПОИСК ====
     const searchInput = document.querySelector('.flex-container .search-input');
     const searchBtn   = document.querySelector('.flex-container .search-output');
 
-    if (!searchInput || !searchBtn) return;
+    if (searchInput && searchBtn) {
+        function goToCatalog() {
+            const term = searchInput.value.trim();
 
-    function goToCatalog() {
-        const term = searchInput.value.trim();
+            if (!term) {
+                window.location.href = 'index5.html';
+                return;
+            }
 
-        if (!term) {
-            // просто открываем каталог из той же папки
-            window.location.href = 'index5.html';
+            window.location.href = 'index5.html?q=' + encodeURIComponent(term);
+        }
+
+        searchBtn.addEventListener('click', goToCatalog);
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') goToCatalog();
+        });
+    }
+
+    // ==== ОТПРАВКА ОТЗЫВА В БЭК ====
+    const form = document.getElementById('feedbackForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const email    = document.getElementById('email').value.trim();
+        const model    = document.getElementById('model').value;
+        const text     = document.getElementById('feedback').value.trim();
+        const ratingEl = document.querySelector('input[name="rating"]:checked');
+        const rating   = ratingEl ? parseInt(ratingEl.value, 10) : 0;
+
+        if (!email || !text) {
+            alert('Заполните email и текст отзыва');
             return;
         }
 
-        // формируем относительный URL
-        window.location.href = 'index5.html?q=' + encodeURIComponent(term);
-    }
+        try {
+            const resp = await fetch('http://localhost:8080/api/reviews', {   // ← тут главное
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    model: model,
+                    rating: rating,
+                    text: text
+                })
+            });
 
-    searchBtn.addEventListener('click', goToCatalog);
-    searchInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') goToCatalog();
+            if (!resp.ok) {
+                const errText = await resp.text();
+                console.error('Ошибка ответа сервера:', errText);
+                alert('Ошибка сохранения отзыва');
+                return;
+            }
+
+            form.reset();
+            alert('Спасибо! Ваш отзыв сохранён.');
+        } catch (err) {
+            console.error('Сетевая ошибка:', err);
+            alert('Не удалось отправить отзыв. Проверьте подключение.');
+        }
     });
 });
-    </script>
+</script>
+
+
 
 
 </body>
